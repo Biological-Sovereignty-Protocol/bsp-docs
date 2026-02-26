@@ -1,9 +1,9 @@
-# BSP Documentation — bsp.dev
+# BSP Documentation — biologicalsovereigntyprotocol.com
 
 > Public documentation for the Biological Sovereignty Protocol
-> Ambrósio Institute · [ambrosio.health](https://ambrosio.health) · [bsp.dev](https://bsp.dev)
+> Ambrósio Institute · [ambrosioinstitute.org](https://ambrosioinstitute.org) · [biologicalsovereigntyprotocol.com](https://biologicalsovereigntyprotocol.com)
 
-This repository powers the documentation site at **[bsp.dev](https://bsp.dev)**.
+This repository powers the documentation site at **[biologicalsovereigntyprotocol.com](https://biologicalsovereigntyprotocol.com)**.
 
 ---
 

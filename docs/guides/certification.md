@@ -83,4 +83,4 @@ On approval, your IEO receives a BSP-Certified on-chain badge via the IEORegistr
 
 ## Questions?
 
-Contact the Institute: dev@ambrosio.health | [bsp.dev/certification](https://bsp.dev/certification)
+Contact the Institute: dev@ambrosioinstitute.org | [biologicalsovereigntyprotocol.com/certification](https://biologicalsovereigntyprotocol.com/certification)

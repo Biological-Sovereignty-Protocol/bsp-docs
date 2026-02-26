@@ -1,0 +1,77 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @media (prefers-color-scheme: dark) {
+      .core { fill: #3b82f6; }
+      .outer { stroke: #60a5fa; }
+      .node { fill: #93c5fd; }
+      .ring { stroke: #3b82f6; }
+    }
+    @media (prefers-color-scheme: light) {
+      .core { fill: #2563eb; }
+      .outer { stroke: #3b82f6; }
+      .node { fill: #1d4ed8; }
+      .ring { stroke: #2563eb; }
+    }
+    .float {
+      animation: float 6s ease-in-out infinite;
+      transform-origin: center;
+    }
+    .spin {
+      animation: spin 20s linear infinite;
+      transform-origin: center;
+    }
+    .pulse {
+      animation: pulse 4s ease-in-out infinite alternate;
+    }
+    .particle {
+      animation: orbit 8s linear infinite;
+      transform-origin: center;
+    }    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0% { opacity: 0.5; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1.05); }
+    }
+    @keyframes orbit {
+      from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+    }
+  </style>
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <g class="float">
+    <!-- Spinning tracks -->
+    <g class="spin">
+      <circle cx="200" cy="200" r="140" fill="none" class="ring" stroke-width="1" stroke-dasharray="4 12" opacity="0.6" />
+      <circle cx="200" cy="200" r="100" fill="none" class="ring" stroke-width="2" stroke-dasharray="20 40" opacity="0.8" />
+    </g>
+
+    <g class="spin" style="animation-direction: reverse; animation-duration: 25s;">
+      <circle cx="200" cy="200" r="120" fill="none" class="ring" stroke-width="1.5" stroke-dasharray="10 30" opacity="0.4" />
+    </g>
+
+    <!-- Shield Core -->
+    <path d="M 200 80 Q 260 80 260 160 Q 260 250 200 320 Q 140 250 140 160 Q 140 80 200 80 Z" fill="none" class="outer" stroke-width="3" opacity="0.8" filter="url(#glow)"/>
+    
+    <!-- Inner Glowing Core -->
+    <circle cx="200" cy="180" r="40" class="core pulse" filter="url(#glow)" opacity="0.7"/>
+    <circle cx="200" cy="180" r="25" class="core" />
+    <path d="M 190 170 L 210 170 M 200 160 L 200 200 M 190 190 L 210 190" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    
+    <!-- Orbiting particles -->
+    <circle cx="200" cy="200" r="6" class="node particle" />
+    <circle cx="200" cy="200" r="4" class="node particle" style="animation-delay: -2s; animation-duration: 6s; transform-origin: 200px 200px;" />
+    <circle cx="200" cy="200" r="8" class="node particle" style="animation-delay: -5s; animation-duration: 12s; transform-origin: 200px 200px;" />
+  </g>
+</svg>

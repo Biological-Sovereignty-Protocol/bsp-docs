@@ -1,6 +1,6 @@
 # BSP Whitepaper
 
-**Biological Sovereignty Protocol v2.0**
+**Biological Sovereignty Protocol v1.0**
 
 *The protocol that gives every human being permanent sovereignty over their own biology.*
 

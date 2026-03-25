@@ -11,7 +11,7 @@ The BSP GitHub infrastructure is organized into two distinct organizations, foll
 | | Public | Private |
 |--|--------|---------|
 | **Organization** | `biological-sovereignty-protocol` | `ambrosio-institute` |
-| **Repositories** | 5 — all public | 4 — all private |
+| **Repositories** | 6 — all public | 3 — all private |
 | **License** | CC BY 4.0 | Proprietary IP |
 | **Access** | Anyone — clone, fork, contribute | Institute only |
 | **Purpose** | The open standard | Operations + proprietary intelligence |
@@ -87,9 +87,13 @@ Connects AI agents to the BSP protocol following the [Model Context Protocol](ht
 npm install @bsp/mcp
 ```
 
-### `bsp-docs` — Public Documentation
+### `bsp-docs-repo` — Public Documentation
 
 This site. Powers `biologicalsovereigntyprotocol.com`. The human entry point for anyone wanting to understand or integrate BSP.
+
+### `bsp-id-web` — BSP Identity Web App
+
+The BSP identity web application. Also available in the `ambrosio-institute` organization as a private fork.
 
 ---
 
@@ -97,7 +101,7 @@ This site. Powers `biologicalsovereigntyprotocol.com`. The human entry point for
 
 These repositories are private — not because the protocol requires them to be, but because they contain the Institute's operational infrastructure and proprietary intelligence that constitutes its competitive advantage.
 
-### `bsp-registry` — Smart Contracts on Arweave
+### `bsp-contracts` — Smart Contracts on Arweave
 
 The five SmartWeave contracts that run the protocol's on-chain infrastructure:
 
@@ -148,14 +152,13 @@ The repositories are designed to be built in this order — each depends on the 
 
 ```
 1. bsp-spec             Foundation — the standard everything implements
-2. bsp-registry         On-chain infrastructure — immutable after deployment
+2. bsp-contracts        On-chain infrastructure — immutable after deployment
 3. bsp-registry-api     Certification portal — built on top of the contracts
 4. bsp-sdk-typescript   First SDK — widest integration coverage
 5. bsp-mcp              AI connectivity — requires the TypeScript SDK
 6. bsp-sdk-python       Lab SDK — follows the same spec as TypeScript
-7. ava-core             Intelligence — trained on standardized BSP data
-8. sva-engine           Scoring — built on AVA analysis
-9. bsp-docs             Documentation — grows with the ecosystem
+7. bsp-id-web           Identity web app — built on the TypeScript SDK
+8. bsp-docs-repo        Documentation — grows with the ecosystem
 ```
 
 ---
@@ -164,6 +167,6 @@ The repositories are designed to be built in this order — each depends on the 
 
 | Organization | Repositories | Cost |
 |-------------|-------------|------|
-| `biological-sovereignty-protocol` (5 public) | Free — public repos always free |
-| `ambrosio-institute` (4 private, ≤3 collaborators) | Free — GitHub Free tier |
-| `ambrosio-institute` (4 private, team expansion) | $4/user/month (GitHub Team) |
+| `biological-sovereignty-protocol` (6 public) | Free — public repos always free |
+| `ambrosio-institute` (3 private, ≤3 collaborators) | Free — GitHub Free tier |
+| `ambrosio-institute` (3 private, team expansion) | $4/user/month (GitHub Team) |

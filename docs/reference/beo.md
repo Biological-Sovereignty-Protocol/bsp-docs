@@ -80,29 +80,37 @@ guardian_3.fragment = encrypt(fragments[2], guardian_3_public_key)
 ```typescript
 interface BEO {
   // Identity
-  beo_id:       string    // Universally unique identifier (UUID v4)
+  beo_id:       string    // Arweave transaction ID of the createBEO transaction
   domain:       string    // .bsp address — e.g., "andre.bsp"
   public_key:   string    // Ed25519 public key (hex-encoded, 32 bytes)
   created_at:   string    // ISO8601 timestamp of BEO creation
   version:      string    // BSP version at time of creation (semver)
+  key_version:  number    // Incremented on every key rotation
 
   // Recovery
   recovery: {
-    enabled:    boolean
     threshold:  number           // Minimum guardians required (default: 2)
     guardians: [{
-      name:          string
       contact:       string      // .bsp domain, email, or phone
-      fragment:      string      // Encrypted key shard (Arweave URL)
-      accepted:      boolean
-      added_at:      string
+      public_key:    string | null  // Registered when guardian accepts
+      role:          "primary" | "secondary" | "tertiary"
+      status:        "PENDING" | "ACTIVE"
+      accepted_at:   string | null
     }]
   } | null
 
+  // Active recovery request (if any)
+  active_recovery: {
+    new_public_key: string       // Key to rotate to on completion
+    requested_at:   string
+    expires_at:     string       // 72h window
+    confirmations:  string[]     // Contacts of guardians who confirmed
+    status:         "PENDING" | "COMPLETED" | "EXPIRED"
+  } | null
+
   // Status
-  status:           "ACTIVE" | "LOCKED" | "RECOVERY_PENDING"
+  status:           "ACTIVE" | "LOCKED"
   locked_at:        string | null
-  lock_reason:      string | null
 }
 ```
 
@@ -143,8 +151,7 @@ interface BioRecord {
 | State | Description |
 |-------|-------------|
 | `ACTIVE` | Operating normally. All operations permitted with valid consent. |
-| `LOCKED` | Holder has voluntarily locked all operations. Useful if compromise is suspected. No reads or writes by institutions. |
-| `RECOVERY_PENDING` | A recovery request has been initiated. No data operations permitted until recovery completes (72h window). |
+| `LOCKED` | Holder has voluntarily locked all operations. Useful if compromise is suspected. No reads or writes by institutions. A recovery request (`requestRecovery`) can still be initiated from a LOCKED BEO. |
 
 ---
 
@@ -157,16 +164,20 @@ All BEO operations are managed by the `BEORegistry` SmartWeave contract on Arwea
 | Function | Who Can Call | Description |
 |----------|-------------|-------------|
 | `createBEO()` | Anyone | Creates a new BEO. Open — no approval required. |
-| `updateRecovery()` | BEO holder only | Configures or updates guardian configuration. Signed by the holder. |
 | `lockBEO()` | BEO holder only | Temporarily locks the BEO. |
-| `rotatePrimaryKey()` | BEO holder (recovery) | Replaces public key after successful recovery. |
+| `unlockBEO()` | BEO holder only | Unlocks a previously locked BEO. |
+| `updateRecovery()` | BEO holder only | Configures or updates guardian configuration. Signed by the holder. |
+| `acceptGuardianship()` | Invited guardian | Guardian accepts role and registers their public key. |
+| `requestRecovery()` | Holder on a new device | Initiates the Social Recovery process. Notifies guardians. |
+| `confirmRecovery()` | Guardian (threshold 2-of-3) | Guardian confirms holder identity. Key rotated automatically when threshold is reached. |
+| `rotateKey()` | BEO holder (recovery or manual) | Replaces public key after successful recovery or manual rotation. |
 | `getBEO()` | Anyone | Returns public BEO data. |
 
 ### Holder Rights (Unconditional)
 
 - Always recover your BEO using seed phrase
 - Always revoke any ConsentToken, instantly
-- Always export all your data (`SOVEREIGN_EXPORT` intent)
+- Always export all your data (`EXPORT_DATA` intent)
 - Always lock your BEO
 - Always choose new guardians
 

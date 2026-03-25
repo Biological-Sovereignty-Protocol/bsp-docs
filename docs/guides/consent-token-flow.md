@@ -63,7 +63,7 @@ interface ConsentToken {
 | `READ_RECORDS` | Read BioRecords from the BEO | 30–90 days (physicians), permanent (platforms) |
 | `ANALYZE_VITALITY` | Request AVA vitality analysis | Permanent (refreshable) |
 | `REQUEST_SCORE` | Request SVA composite score | Annual (insurers with user opt-in) |
-| `SOVEREIGN_EXPORT` | Export all data | Always available to BEO holder only |
+| `EXPORT_DATA` | Export all data | Always available to BEO holder only |
 | `SYNC_PROTOCOL` | Protocol version negotiation | Per session |
 
 A single token can include multiple intents. The IEO can only use what is listed in `scope.intents`.

@@ -140,11 +140,10 @@ If the user has connected to an AVA-powered platform:
 | `bsp-sdk-typescript` | SDK for web/mobile integration | App developers, platforms |
 | `bsp-sdk-python` | SDK for lab/research integration | Laboratories, scientists |
 | `bsp-mcp` | MCP server connecting AI to BSP | AI developers (Claude, GPT, etc.) |
-| `bsp-docs` | This documentation site | Everyone |
-| `bsp-registry` | Smart contracts on Arweave | Protocol infrastructure (private) |
+| `bsp-id-web` | BSP identity web application | End users creating and managing BEOs |
+| `bsp-docs-repo` | This documentation site | Everyone |
+| `bsp-contracts` | Smart contracts on Arweave | Protocol infrastructure (private) |
 | `bsp-registry-api` | Certification portal | Institutions seeking certification (private) |
-| `ava-core` | The AVA algorithm | Ambrósio Institute (private) |
-| `sva-engine` | SVA scoring engine | Ambrósio Institute (private) |
 
 ---
 
@@ -154,12 +153,11 @@ The repositories were designed to be built in this order — each depends on the
 
 ```
 1. bsp-spec          ← Foundation: the standard everyone implements
-2. bsp-registry      ← Smart contracts: the protocol's on-chain infrastructure
+2. bsp-contracts     ← Smart contracts: the protocol's on-chain infrastructure
 3. bsp-registry-api  ← Certification portal: human workflow over contracts
 4. bsp-sdk-typescript← First SDK: widest integration coverage
 5. bsp-mcp           ← AI connectivity: built on the TypeScript SDK
 6. bsp-sdk-python    ← Lab SDK: for laboratories and researchers
-7. ava-core          ← Intelligence: trained on BSP-standardized data
-8. sva-engine        ← Scoring: outputs the product the user experiences
-9. bsp-docs          ← Grows with the ecosystem (you are here)
+7. bsp-id-web        ← Identity web app: built on the TypeScript SDK
+8. bsp-docs-repo     ← Grows with the ecosystem (you are here)
 ```

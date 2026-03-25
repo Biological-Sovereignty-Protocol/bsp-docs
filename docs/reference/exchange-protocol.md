@@ -204,7 +204,7 @@ Available only to PLATFORM IEOs integrated with AVA. Requires active `ANALYZE_VI
 
 ---
 
-### `SOVEREIGN_EXPORT` — Export All Data
+### `EXPORT_DATA` — Export All Data
 
 Always available to BEO holders. Cannot be restricted by any IEO.
 

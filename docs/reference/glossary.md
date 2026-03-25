@@ -86,7 +86,8 @@ Typed enum defining what action a system requests in the Exchange Protocol. Each
 | `READ_RECORDS` | Read existing BioRecords |
 | `ANALYZE_VITALITY` | Request AVA analysis |
 | `REQUEST_SCORE` | Request SVA score |
-| `SOVEREIGN_EXPORT` | Export all data (always available to BEO holder) |
+| `EXPORT_DATA` | Export all data (always available to BEO holder) |
+| `SYNC_PROTOCOL` | Protocol version negotiation |
 
 ### CertLevel
 Enum representing BSP certification levels for an institution.
@@ -114,8 +115,8 @@ Mechanism for recovering a BEO private key without a central server. The holder 
 | `bsp-sdk-typescript` | Public | Official TypeScript SDK (`@bsp/sdk`) |
 | `bsp-sdk-python` | Public | Official Python SDK (`bsp-sdk`) |
 | `bsp-mcp` | Public | Official MCP server for AI connectivity |
-| `bsp-docs` | Public | This documentation site |
-| `bsp-registry` | Private | Smart contracts on Arweave |
+| `bsp-id-web` | Public | BSP identity web application |
+| `bsp-docs-repo` | Public | This documentation site |
+| `bsp-contracts` | Private | Smart contracts on Arweave |
 | `bsp-registry-api` | Private | Certification portal API |
-| `ava-core` | Private | AVA algorithm — proprietary intelligence |
-| `sva-engine` | Private | SVA scoring engine |
+| `bsp-id-web` | Private | Identity web app (Ambrosio Institute fork) |

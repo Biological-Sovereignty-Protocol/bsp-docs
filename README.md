@@ -69,7 +69,8 @@ Open an issue or pull request in this repository. All documentation is CC BY 4.0
 | [bsp-sdk-typescript](https://github.com/Biological-Sovereignty-Protocol/bsp-sdk-typescript) | Public | TypeScript SDK (`@bsp/sdk`) |
 | [bsp-sdk-python](https://github.com/Biological-Sovereignty-Protocol/bsp-sdk-python) | Public | Python SDK (`bsp-sdk`) |
 | [bsp-mcp](https://github.com/Biological-Sovereignty-Protocol/bsp-mcp) | Public | MCP server for AI connectivity |
-| [bsp-docs](https://github.com/Biological-Sovereignty-Protocol/bsp-docs) | Public | This repository |
+| [bsp-id-web](https://github.com/Biological-Sovereignty-Protocol/bsp-id-web) | Public | BSP identity web application |
+| [bsp-docs-repo](https://github.com/Biological-Sovereignty-Protocol/bsp-docs-repo) | Public | This repository |
 
 ---
 

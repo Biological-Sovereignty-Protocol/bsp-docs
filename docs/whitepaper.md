@@ -78,7 +78,7 @@ No institution can read or write to your BEO without a valid **ConsentToken** â€
 Revoking a ConsentToken is instant and on-chain. The moment you revoke, the smart contract rejects all future requests from that institution. They cannot retain copies of your data beyond what they have already processed.
 
 ### Sovereign Export
-Every BEO holder has the unconditional right to export all their data at any time, via the `SOVEREIGN_EXPORT` intent. No institution can block this.
+Every BEO holder has the unconditional right to export all their data at any time, via the `EXPORT_DATA` intent. No institution can block this.
 
 ---
 

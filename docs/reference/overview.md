@@ -96,7 +96,7 @@ The Exchange Protocol uses typed intents to define what action is being requeste
 | `READ_RECORDS` | Read BioRecords from a BEO |
 | `ANALYZE_VITALITY` | Request AVA analysis |
 | `REQUEST_SCORE` | Request SVA score |
-| `SOVEREIGN_EXPORT` | Export all data (always available to BEO holder) |
+| `EXPORT_DATA` | Export all data (always available to BEO holder) |
 | `SYNC_PROTOCOL` | Version negotiation |
 
 ### ConsentToken

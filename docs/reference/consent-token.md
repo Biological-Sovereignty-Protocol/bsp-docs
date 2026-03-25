@@ -66,7 +66,7 @@ Every ConsentToken authorizes one or more intents:
 | `READ_RECORDS` | Read BioRecords from the BEO | 30–90 days (physicians); permanent (platforms) |
 | `ANALYZE_VITALITY` | Request AVA vitality analysis | Permanent (refreshable) |
 | `REQUEST_SCORE` | Request SVA score | Annual (insurers with opt-in) |
-| `SOVEREIGN_EXPORT` | Export all data | Always available to BEO holder |
+| `EXPORT_DATA` | Export all data | Always available to BEO holder |
 | `SYNC_PROTOCOL` | Protocol version negotiation | Per session |
 
 ---
@@ -146,10 +146,13 @@ print(result.status)  # REVOKED
 
 | Function | Authorized Caller | Description |
 |----------|------------------|-------------|
-| `createConsent()` | BEO holder only | Issues a new ConsentToken |
-| `revokeConsent()` | BEO holder only | Immediately revokes a token |
-| `verifyConsent()` | Any IEO | Checks if a token is valid for a given intent + category |
-| `getConsentHistory()` | BEO holder only | Returns full audit log of all tokens issued |
+| `grantConsent()` | BEO holder only | Issues a new ConsentToken. Requires Ed25519 signature. Only one active token per BEO+IEO pair. |
+| `revokeToken()` | BEO holder only | Immediately revokes a specific token |
+| `revokeAllFromIEO()` | BEO holder only | Revokes all active tokens granted to a specific IEO |
+| `revokeByIntent()` | BEO holder only | Revokes all active tokens that include a specific intent |
+| `revokeAllTokens()` | BEO holder only | Emergency: revokes all active tokens for the BEO |
+| `verifyToken()` | Any IEO | Checks if a token is valid for a given intent + category. Returns `{ valid, reason }` — never throws. |
+| `listTokens()` | Anyone | Returns all tokens for a BEO (with optional `activeOnly` filter) |
 
 **Architectural guarantee**: Only the BEO holder can grant or revoke consent. No institution, no other system, and not even the Ambrósio Institute can grant access to a user's data on their behalf.
 

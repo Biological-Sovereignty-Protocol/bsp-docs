@@ -1,217 +1,264 @@
+---
+title: BEO — Biological Entity Object
+---
+
 # BEO — Biological Entity Object
 
-The **Biological Entity Object (BEO)** is the sovereign, permanent biological identity of a human being in the BSP ecosystem. It is the point of anchorage for all BioRecords, all ConsentTokens, and all intelligence derived from a person's biological data.
-
-> "A BEO belongs to the individual permanently. No company, government, or authority — including the Ambrósio Institute — can access, modify, or delete it without the holder's private key."
+> Version 0.2 | Ambrósio Institute
 
 ---
 
-## 1. What a BEO Is
+## Overview
 
-A BEO is:
-- **Created by the individual** — no approval required from any institution
-- **Controlled by a private key** — generated locally on the device, never transmitted
-- **Permanent** — stored on Arweave, immutable, survives any company's closure
-- **Identified by a `.bsp` domain** — e.g., `andre.bsp`
+The **Biological Entity Object (BEO)** is the central unit of the BSP. Every piece of data in the BSP ecosystem is anchored to a BEO.
 
-All BioRecords for a person are attached to their BEO. Consent is issued from it. All data exchange flows through it.
+The BEO is **sovereign** — it belongs to the individual, not to any platform. It is stored on decentralized infrastructure (Arweave) and identified by a permanent `.bsp` domain name.
 
----
-
-## 2. Cryptographic Identity
-
-### The Key Pair
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `private_key` | Ed25519 | Generated locally on device. Never transmitted. Used to sign authorizations and decrypt BioRecords. |
-| `public_key` | Ed25519 | Registered on BEORegistry on Arweave. Used by systems to identify the BEO and encrypt data before submission. |
-| `key_algorithm` | Ed25519 | Compact 64-byte signatures, proven performance in low-power environments. |
-| `seed_phrase` | 24 words (BIP-39) | Mnemonic representation of the private key. Allows reconstruction on any compatible device. Must be stored offline. |
-
-### Key Generation
-
-```javascript
-// All key generation happens 100% on the device
-const entropy  = crypto.getRandomValues(new Uint8Array(32))
-const mnemonic = bip39.entropyToMnemonic(entropy)
-const seed     = await bip39.mnemonicToSeed(mnemonic)
-const keyPair  = ed25519.fromSeed(seed.slice(0, 32))
-
-const privateKey = keyPair.secretKey  // stays on device, never leaves
-const publicKey  = keyPair.publicKey  // registered on Arweave
-const domain     = await bsp.registerDomain("andre.bsp", publicKey)
-```
+> **The difference between a BEO and a traditional medical record is fundamental:**
+> The medical record belongs to the hospital. The BEO belongs to you.
+> The hospital is only a contributor — not the owner.
 
 ---
 
-## 3. Social Recovery
-
-Losing the private key without a backup seed phrase means permanent loss of access. BSP solves this with **Social Recovery** — no central server involved.
-
-### Configuration
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `guardians` | Guardian[3] | Up to 3 trusted people designated by the holder. No guardian can access BEO data — they only hold an encrypted key fragment. |
-| `recovery_threshold` | number (2) | Minimum guardians required to approve recovery. Default: 2 of 3. |
-| `guardian_fragment` | string (encrypted) | Cryptographic key fragment, encrypted with the guardian's public key. Stored on Arweave — the Institute never has the full key. |
-
-### How It Works (Shamir Secret Sharing)
-
-```javascript
-// Key is split into 3 fragments — any 2 can reconstruct it
-const fragments = shamirSplit(recovery_key, threshold=2, shares=3)
-
-// Each fragment encrypted with the respective guardian's public key
-guardian_1.fragment = encrypt(fragments[0], guardian_1_public_key)
-guardian_2.fragment = encrypt(fragments[1], guardian_2_public_key)
-guardian_3.fragment = encrypt(fragments[2], guardian_3_public_key)
-
-// Fragments stored on Arweave — publicly visible, unreadable
-```
-
-**Security guarantee**: No guardian can act alone. The Ambrósio Institute is never in this flow.
-
----
-
-## 4. BEO Complete Schema
+## BEO Object Schema
 
 ```typescript
-interface BEO {
-  // Identity
-  beo_id:       string    // Arweave transaction ID of the createBEO transaction
-  domain:       string    // .bsp address — e.g., "andre.bsp"
-  public_key:   string    // Ed25519 public key (hex-encoded, 32 bytes)
-  created_at:   string    // ISO8601 timestamp of BEO creation
-  version:      string    // BSP version at time of creation (semver)
-  key_version:  number    // Incremented on every key rotation
+BEO {
+  // ─── IDENTITY ──────────────────────────────────────────────────
+  beo_id:      string     // Universally unique biological identifier (UUID v4)
+  domain:      string     // Human-readable address — e.g. "andre.bsp"
+  created_at:  ISO8601    // When this entity was first registered
+  version:     semver     // BSP version of this record
 
-  // Recovery
-  recovery: {
-    threshold:  number           // Minimum guardians required (default: 2)
-    guardians: [{
-      contact:       string      // .bsp domain, email, or phone
-      public_key:    string | null  // Registered when guardian accepts
-      role:          "primary" | "secondary" | "tertiary"
-      status:        "PENDING" | "ACTIVE"
-      accepted_at:   string | null
-    }]
-  } | null
+  // ─── CRYPTOGRAPHY ──────────────────────────────────────────────
+  public_key:  string     // Owner's public key (RSA-4096 or Ed25519)
+  key_version: number     // Increments on key rotation (starts at 1)
 
-  // Active recovery request (if any)
-  active_recovery: {
-    new_public_key: string       // Key to rotate to on completion
-    requested_at:   string
-    expires_at:     string       // 72h window
-    confirmations:  string[]     // Contacts of guardians who confirmed
-    status:         "PENDING" | "COMPLETED" | "EXPIRED"
-  } | null
+  // ─── DATA ──────────────────────────────────────────────────────
+  records:     BioRecord[]  // All biological measurements
+  protocols:   Protocol[]   // Active health protocols
 
-  // Status
-  status:           "ACTIVE" | "LOCKED"
-  locked_at:        string | null
+  // ─── SOVEREIGNTY ───────────────────────────────────────────────
+  sovereignty: SovereigntyMeta  // Ownership, consent, and recovery metadata
+
+  // ─── STATUS ────────────────────────────────────────────────────
+  active_recovery: object | null  // Active recovery request metadata, or null
+  locked_at:       string | null  // ISO8601 timestamp if BEO is locked, or null
+}
+
+SovereigntyMeta {
+  guardians:       Guardian[]   // Social recovery network (3 recommended)
+  recovery_scheme: string       // "2-of-3" threshold
+  seed_phrase_hash: string      // Hashed verification (phrase stored offline by user)
+  consent_log:     ConsentEntry[] // All access authorizations — on-chain
+}
+
+Guardian {
+  contact:     string              // How to reach this guardian (encrypted)
+  public_key:  string             // Guardian's public key for the recovery protocol
+  role:        string             // 'primary' | 'secondary' | 'tertiary'
+  status:      'PENDING' | 'ACTIVE'  // Whether they have accepted the guardian role
+  accepted_at: string | null      // ISO8601 timestamp of acceptance, or null if pending
 }
 ```
 
 ---
 
-## 5. BioRecord Schema
+## Creating a BEO
 
-Every biological measurement attached to a BEO is a BioRecord:
+BEO creation is **open to anyone**. No permission from the Ambrósio Institute or any authority is required.
 
 ```typescript
-interface BioRecord {
-  record_id:    string    // Arweave transaction ID — permanent
-  beo_id:       string    // Owner BEO
-  ieo_id:       string    // Submitting institution
-  biomarker:    string    // BSP code — e.g., "BSP-LA-004" (NAD+)
-  value:        number    // Measured value
-  unit:         string    // Standardized unit — e.g., "umol/L"
-  collected_at: string    // ISO8601 — when the sample was collected
-  submitted_at: string    // ISO8601 — when it was written to Arweave
-  ref_range: {
-    optimal:    string    // e.g., "40-60"
-    functional: string    // e.g., "30-70"
-    deficiency: string    // e.g., "<30"
-    toxicity:   string    // e.g., ">100" (when applicable)
-  }
-  status:       "CURRENT" | "SUPERSEDED"
-  supersedes:   string | null    // record_id of older entry this corrects
-  data_hash:    string           // SHA-256 of the raw measurement for audit
-}
+// Using the bsp-sdk-typescript
+import { BEOClient } from '@bsp/sdk'
+
+const client = new BEOClient()
+
+const beo = await client.create({
+  domain: 'andre.bsp',       // Desired .bsp domain
+  guardians: [               // Optional at creation — can add later
+    { contact: 'maria@example.com', public_key: '...' },
+    { contact: 'joao@example.com',  public_key: '...' },
+  ]
+})
+
+console.log(beo.beo_id)   // "550e8400-e29b-41d4-a716-446655440000"
+console.log(beo.domain)   // "andre.bsp"
 ```
-
-**Key property**: BioRecords are **immutable**. Corrections are submitted as new records that supersede the previous one — the error never disappears from history.
-
----
-
-## 6. BEO Lifecycle States
-
-| State | Description |
-|-------|-------------|
-| `ACTIVE` | Operating normally. All operations permitted with valid consent. |
-| `LOCKED` | Holder has voluntarily locked all operations. Useful if compromise is suspected. No reads or writes by institutions. A recovery request (`requestRecovery`) can still be initiated from a LOCKED BEO. |
-
----
-
-## 7. Smart Contract: BEORegistry
-
-All BEO operations are managed by the `BEORegistry` SmartWeave contract on Arweave.
-
-### Key Functions
-
-| Function | Who Can Call | Description |
-|----------|-------------|-------------|
-| `createBEO()` | Anyone | Creates a new BEO. Open — no approval required. |
-| `lockBEO()` | BEO holder only | Temporarily locks the BEO. |
-| `unlockBEO()` | BEO holder only | Unlocks a previously locked BEO. |
-| `updateRecovery()` | BEO holder only | Configures or updates guardian configuration. Signed by the holder. |
-| `acceptGuardianship()` | Invited guardian | Guardian accepts role and registers their public key. |
-| `requestRecovery()` | Holder on a new device | Initiates the Social Recovery process. Notifies guardians. |
-| `confirmRecovery()` | Guardian (threshold 2-of-3) | Guardian confirms holder identity. Key rotated automatically when threshold is reached. |
-| `rotateKey()` | BEO holder (recovery or manual) | Replaces public key after successful recovery or manual rotation. |
-| `getBEO()` | Anyone | Returns public BEO data. |
-
-### Holder Rights (Unconditional)
-
-- Always recover your BEO using seed phrase
-- Always revoke any ConsentToken, instantly
-- Always export all your data (`EXPORT_DATA` intent)
-- Always lock your BEO
-- Always choose new guardians
-
----
-
-## 8. Creating a BEO with the SDK
 
 ```python
-# Python SDK
-from bsp_sdk import BEOBuilder, Guardian
+# Using the bsp-sdk-python
+from bsp_sdk import BEOClient
 
-beo = BEOBuilder(domain="andre.bsp").build()
-result = beo.register()
+client = BEOClient()
 
-print(result.beo_id)     # Permanent UUID on Arweave
-print(result.domain)     # andre.bsp
-print(result.seed_phrase) # 24 words — store offline
-
-# Optional: configure Social Recovery
-beo.update_recovery(
+beo = client.create(
+    domain="andre.bsp",
     guardians=[
-        Guardian(name="Maria",  contact="maria.bsp",     role="primary"),
-        Guardian(name="João",   contact="+5511999...",   role="secondary"),
-        Guardian(name="Carlos", contact="carlos@...",    role="tertiary"),
-    ],
-    threshold=2
+        {"contact": "maria@example.com", "public_key": "..."},
+    ]
 )
+
+print(beo.beo_id)    # "550e8400-e29b-41d4-a716-446655440000"
+print(beo.domain)    # "andre.bsp"
 ```
 
 ---
 
-## See Also
+## The .bsp Domain
 
-- [IEO Specification →](./ieo.md)
-- [ConsentToken & Access Control →](./consent-token.md)
-- [Security & Blockchain →](../guides/security-blockchain.md)
-- [Developer Quickstart →](../quickstart/README.md)
+Every BEO is identified by a human-readable `.bsp` domain — a permanent, sovereign biological address.
+
+| Domain Type | Example | Rules |
+|---|---|---|
+| Individual | `andre.bsp` | Free, permanent, non-transferable, tied to one BEO |
+| Professional | `dr.carlos.bsp` | Paid, permanent, non-transferable, tied to practitioner IEO |
+| Institutional | `fleury.bsp` | Paid, annual renewal, transferable, tied to IEO |
+| Research | `usp.longevity.bsp` | Paid, tied to Research Partner certification |
+
+→ See [`bsp-domain.md`](bsp-domain.md) for the complete domain system specification.
+
+---
+
+## BEO Properties
+
+### Permanence
+Once created, a BEO cannot be deleted — by the owner, by any institution, or by the Ambrósio Institute. The biological identity exists permanently on Arweave.
+
+### Sovereignty
+The individual holds the private key. No system — including the Ambrósio Institute — can access the BEO's data without explicit authorization from the key holder.
+
+### Portability
+All data within a BEO can be exported in BSP-standard format at any time. No lock-in.
+
+### Immutability
+BioRecords cannot be altered once written. Corrections are submitted as new BioRecords that supersede previous records — preserving the complete audit trail.
+
+---
+
+## Lock / Unlock BEO
+
+The BEO holder can temporarily **lock** their BEO, freezing all data exchange operations. While locked, the AccessControl smart contract rejects every transaction — reads, writes, and new consent requests all return error `BSP-E-014`.
+
+Locking does not revoke existing consent tokens. It suspends their effect until the BEO is unlocked. This is useful during key compromise investigations, extended travel, or any situation where the holder wants to pause all access without permanently revoking consents.
+
+### Lock
+
+```typescript
+import { BEOClient } from '@bsp/sdk'
+
+const client = new BEOClient({ ownerKey: myPrivateKey })
+
+await client.lock({
+  beo_id: '550e8400-...',
+  reason: 'Key compromise investigation'  // Optional, stored on-chain
+})
+// BEO is now frozen — all exchange operations rejected
+```
+
+### Unlock
+
+```typescript
+await client.unlock({
+  beo_id: '550e8400-...'
+})
+// BEO is active again — existing consent tokens resume effect
+```
+
+### Properties
+
+- Only the BEO holder (private key owner) can lock or unlock
+- Lock/unlock events are recorded permanently on Arweave
+- The `locked_at` field on the BEO object reflects the current lock timestamp (or `null` if unlocked)
+- Guardians cannot lock or unlock a BEO — only the holder
+- A locked BEO can still be recovered through the Social Recovery Protocol
+
+---
+
+## Access Control
+
+All third-party access to a BEO is governed by the **AccessControl** smart contract on Arweave.
+
+Any system that wants to read from or write to a BEO must:
+1. Request authorization from the BEO holder
+2. Receive a signed consent token from the holder
+3. Submit that token with every transaction
+
+Without a valid token, the smart contract automatically rejects the transaction. The individual is the gatekeeper — not the Ambrósio Institute.
+
+Consent tokens are:
+- **Scoped** — limited to specific data categories and intents
+- **Time-limited** — expire automatically unless renewed
+- **Revocable** — the holder can revoke at any time
+- **Auditable** — all grants and revocations are permanently recorded on-chain
+
+→ See [`exchange.md`](exchange.md) for the complete consent token specification.
+
+---
+
+## Social Recovery
+
+If a BEO holder loses their private key, recovery is possible through the guardian network.
+
+**Recovery requires:** 2 of 3 guardians to confirm the holder's identity.
+
+No single guardian can restore access alone. No central server is involved. The recovery protocol is executed on-chain.
+
+**Guardian setup:**
+1. At BEO creation (recommended), designate 3 trusted people
+2. Each guardian accepts the role and provides a public key
+3. Recovery threshold: 2-of-3 signatures required
+
+→ See [`bsp-domain.md`](bsp-domain.md) for recovery protocol details.
+
+---
+
+## BEO vs IEO — Key Distinctions
+
+| Property | BEO (Individual) | IEO (Institution) |
+|---|---|---|
+| Represents | A living human being | An organization, system, or professional |
+| Created by | The individual | Any institution, directly |
+| Transferable | Never | Yes — on acquisition or merger |
+| Can read BEOs | Own data only | Only with valid consent token |
+| Can write to BEOs | Cannot | Yes — with AccessControl authorization |
+| Domain format | `firstname.bsp` | `institutionname.bsp` |
+| Cost | Free — sovereignty is a right | Paid — annual certification fee |
+
+→ See [`ieo.md`](ieo.md) for the complete IEO specification.
+
+---
+
+## Example BEO (JSON)
+
+```json
+{
+  "beo_id": "550e8400-e29b-41d4-a716-446655440000",
+  "domain": "andre.bsp",
+  "created_at": "2026-02-24T14:32:00Z",
+  "version": "0.2.0",
+  "public_key": "ed25519:4K8Yg2...",
+  "key_version": 1,
+  "active_recovery": null,
+  "locked_at": null,
+  "sovereignty": {
+    "guardians": [
+      {
+        "contact": "encrypted:3a7b9c...",
+        "public_key": "ed25519:7xM2Pq...",
+        "role": "primary",
+        "status": "ACTIVE",
+        "accepted_at": "2026-02-24T14:35:00Z"
+      }
+    ],
+    "recovery_scheme": "2-of-3",
+    "consent_log": []
+  }
+}
+```
+
+→ Full example: [`../examples/beo-example.json`](../examples/beo-example.json)
+
+---
+
+*Ambrósio Institute · ambrosioinstitute.org · biologicalsovereigntyprotocol.com*

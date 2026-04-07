@@ -1,163 +1,51 @@
-# Ecosystem Flow
-
-This guide explains the end-to-end flow of the BSP ecosystem — how developers, institutions, and users interact with the protocol at every stage.
-
+---
+title: "BSP Ecosystem Flow"
+description: "End-to-end data flow in the Biological Sovereignty Protocol — from BEO creation to AI consumption."
 ---
 
-## The Developer Journey
+<div class="page-hero-image">
+  <img src="/images/arch-overview.jpg" alt="BSP Architecture Overview" style="width:100%;border-radius:16px;margin-bottom:2rem;box-shadow:0 8px 32px rgba(0,118,255,0.12);" />
+</div>
 
-### Step 1: Install the SDK
+# The Ecosystem Flow
 
-```bash
-# TypeScript / JavaScript
-npm install @bsp/sdk
+"From first access to Vitality Score — the complete journey of the developer and the user through the BSP repositories."
 
-# Python
-pip install bsp-sdk
-```
+This document explains step-by-step how the BSP ecosystem operates in practice. The two protagonists are the **Developer** (who builds on the protocol) and the **User** (who lives under its protection). Both paths intersect at the **BEO** (Biological Entity Object).
 
-### Step 2: Create Your IEO
+<EcosystemFlowMcp />
 
-Your Institutional Entity Object (IEO) is your organization's permanent identity in the BSP ecosystem. Creating one requires no approval — just a small AR token fee to register on Arweave.
+## Part 1: The Developer's Journey
+How a laboratory, app, or platform enters the BSP ecosystem:
 
-```python
-from bsp_sdk import IEOBuilder, IEOType
+1.  **Understand the Protocol (`bsp-spec`)**: A developer accesses the public BSP specification. They learn what a BEO is and how the Exchange Protocol works. No registration or approval is needed.
+2.  **Install the SDK (`bsp-sdk`)**: Whether building in Python or TypeScript, the developer installs the SDK (e.g., `pip install bsp-sdk`). They can immediately start structuring data into valid, sovereign BioRecords.
+3.  **Request Authorization**: The lab wants to submit data. They use the SDK to ask the user for authorization. The user signs a ConsentToken on-chain. Without this, the Arweave blockchain automatically rejects the transaction.
+4.  **Connect AI Agents (`bsp-mcp`)**: A health platform wants their AI to read the BEO. They install `bsp-mcp` (the official Model Context Protocol server for BSP), allowing AIs like Claude to query biological data — strictly under the user's consent.
 
-ieo = IEOBuilder(
-    domain      = "yourlaboratory.bsp",
-    name        = "Your Laboratory Name",
-    ieo_type    = IEOType.LABORATORY,
-    jurisdiction = "BR",
-    legal_id    = "12.345.678/0001-99",
-).build()
+## Part 2: The User's Journey
+From the perspective of a person living within the ecosystem:
 
-result = ieo.register()
-print(result.ieo_id)    # Permanent ID on Arweave
-print(result.domain)    # yourlaboratory.bsp
-```
+1.  **Identity Creation (`bsp-contracts`)**: The first time you use a BSP app, your BEO is created. Keys are generated locally. The address (e.g., `andre.bsp`) belongs to you forever.
+2.  **Data Arrival (`bsp-sdk` + Arweave)**: You do a blood test. The laboratory formats the data as BioRecords and sends them. Because you authorized the lab, the data is encrypted with your key and stored permanently on Arweave.
+3.  **Vitality Analysis (`ava-core`)**: You open your app and actively request an analysis. The app decrypts the BioRecords locally and sends them to the AVA intelligence engine (with session consent). AVA processes the data.
+4.  **The Final Product (`sva-engine`)**: You receive your Ambrósio Vitality Score (SVA) — a multi-dimensional biological age score showing where you are winning and where you need to act.
+5.  **AI Assistant (`bsp-mcp`)**: You ask your AI healthcare assistant about your results. Through the MCP connection, the AI reads your sovereign data and provides deeply contextualized medical insights.
 
-Your IEO starts as `UNCERTIFIED`. You can request and receive ConsentTokens from users immediately. [BSP Certification](../guides/certification.md) is voluntary but unlocks the AVA data pipeline and official directory listing.
+## Where Paths Cross: The Repository Roles
 
-### Step 3: Request User Consent
+| Repository | Who Uses It | Purpose |
+|------------|-------------|---------|
+| `bsp-spec` | Devs, Labs, Auditors | The public law of the protocol. |
+| `bsp-sdk` | App & Backend Devs | The builder's tools (Python/TypeScript). |
+| `bsp-mcp` | AI Platforms | Connects AI agents to the protocol with consent. |
+| `bsp-contracts` | Ambrósio Institute | Smart contracts on Arweave (identities live here). |
+| `ava-core` | Ambrósio Institute | Proprietary intelligence (processes BioRecords). |
+| `sva-engine` | Ambrósio Institute | Produces the Vitality Score for the user. |
 
-Before interacting with any user's BEO, you need a ConsentToken from them. Users issue tokens via any BSP-compatible app.
+## Why is it designed this way?
 
-```python
-from bsp_sdk import BSPClient
-
-client = BSPClient(
-    ieo_domain  = "yourlaboratory.bsp",
-    private_key = YOUR_PRIVATE_KEY,
-)
-
-# Verify the token before any operation
-verification = client.verify_consent(
-    token_id   = token_from_user,
-    beo_domain = "patient.bsp",
-    intent     = "SUBMIT_RECORD",
-    category   = "BSP-HM",
-)
-
-if verification.valid:
-    # Proceed with the operation
-    pass
-```
-
-### Step 4: Submit or Read BioRecords
-
-```python
-# Laboratory track: submit results
-result = client.submit_biorecord(
-    beo_domain    = "patient.bsp",
-    consent_token = token_id,
-    biomarker     = "BSP-HM-001",  # Hemoglobin
-    value         = 13.8,
-    unit          = "g/dL",
-    collected_at  = "2026-02-26T08:00:00Z",
-    ref_range     = { "optimal": "13.5-17.5", "functional": "12.0-17.5" }
-)
-
-# Clinic/platform track: read existing records
-records = client.read_records(
-    beo_domain    = "patient.bsp",
-    consent_token = token_id,
-    filters = {
-        "categories": ["BSP-CV", "BSP-GL"],
-        "period": { "from": "2025-01-01", "to": None }
-    }
-)
-```
-
----
-
-## The User Journey
-
-### Phase 1: Creating a BEO
-
-The user creates their sovereign biological identity using any BSP-compatible app:
-
-1. **Key generation** — App generates an Ed25519 key pair locally. The private key never leaves the device.
-2. **BEO registration** — App calls the `BEORegistry` on Arweave to register the BEO.
-3. **.bsp domain** — User chooses `yourname.bsp` — the DomainRegistry confirms uniqueness.
-4. **Social Recovery (optional)** — User designates 3 guardians with a 2-of-3 threshold. Enables key recovery without any central server.
-
-### Phase 2: Authorizing an Institution
-
-When a laboratory or clinic asks for consent to submit or read data:
-
-1. User receives a consent request specifying: which institution, which data categories, what actions, for how long.
-2. User reviews and approves in the app.
-3. App calls `AccessControl` on Arweave — ConsentToken is minted on-chain.
-4. The institution can now perform the authorized actions.
-
-**Revocation is instant**: One tap in the app calls `AccessControl.revokeConsent()`. The institution is immediately blocked.
-
-### Phase 3: Receiving BioRecords
-
-When a laboratory submits results:
-
-1. Lab constructs BioRecords in BSP format (standardized codes, units, reference ranges).
-2. Lab SDK encrypts each record with the user's public key.
-3. Records are written to Arweave — permanent, immutable.
-4. User's app receives a notification and decrypts the records locally using their private key.
-
-### Phase 4: Getting the Vitality Score (SVA)
-
-If the user has connected to an AVA-powered platform:
-
-1. User initiates an analysis actively in the app ("Analyze my health").
-2. App decrypts the BioRecords locally and sends them to AVA with explicit session consent.
-3. AVA processes the data and returns the multi-dimensional SVA Score.
-4. User sees their biological age, aging velocity, and system-by-system breakdown.
-
----
-
-## Repository Roles in the Ecosystem
-
-| Repository | Role | Who Uses It |
-|------------|------|------------|
-| `bsp-spec` | Defines the standard | Developers reading the spec |
-| `bsp-sdk-typescript` | SDK for web/mobile integration | App developers, platforms |
-| `bsp-sdk-python` | SDK for lab/research integration | Laboratories, scientists |
-| `bsp-mcp` | MCP server connecting AI to BSP | AI developers (Claude, GPT, etc.) |
-| `bsp-id-web` | BSP identity web application | End users creating and managing BEOs |
-| `bsp-docs-repo` | This documentation site | Everyone |
-| `bsp-contracts` | Smart contracts on Arweave | Protocol infrastructure (private) |
-| `bsp-registry-api` | Certification portal | Institutions seeking certification (private) |
-
----
-
-## The Build Sequence
-
-The repositories were designed to be built in this order — each depends on the previous:
-
-```
-1. bsp-spec          ← Foundation: the standard everyone implements
-2. bsp-contracts     ← Smart contracts: the protocol's on-chain infrastructure
-3. bsp-registry-api  ← Certification portal: human workflow over contracts
-4. bsp-sdk-typescript← First SDK: widest integration coverage
-5. bsp-mcp           ← AI connectivity: built on the TypeScript SDK
-6. bsp-sdk-python    ← Lab SDK: for laboratories and researchers
-7. bsp-id-web        ← Identity web app: built on the TypeScript SDK
-8. bsp-docs-repo     ← Grows with the ecosystem (you are here)
-```
+*   **Why is the protocol open?** Because a closed standard is just a product. If BSP required approval to create a BEO, the Institute would be a bottleneck.
+*   **Why does consent replace certification as the gatekeeper?** Because an on-chain signature is mathematically verifiable; it doesn't require trusting an institution. Certification is a badge of trust, not the key to the door.
+*   **Why is the intelligence (AVA) closed?** The competitive advantage of the Institute is not the protocol itself, but the intelligence applied to the standardized data flowing through it.
+*   **Why does AVA never have passive access?** Because true sovereignty means no system analyzes your data unless you ask it to.

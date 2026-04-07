@@ -1,274 +1,292 @@
-# Exchange Protocol
+---
+title: BSP Exchange Protocol
+---
 
-The BSP Exchange Protocol defines how data moves between systems — the format of requests and responses, the authentication model, and the full set of typed interactions (intents).
+# BSP Exchange Protocol
+
+> Version 0.2 | Ambrósio Institute
 
 ---
 
-## 1. Request/Response Model
+## Overview
 
-Every interaction in the BSP ecosystem is a `BSPRequest` → `BSPResponse` cycle, enforced by the AccessControl smart contract on Arweave.
+The BSP Exchange Protocol defines how systems request and respond with biological data — the communication layer of the protocol.
 
-### BSPRequest Schema
-
-```typescript
-interface BSPRequest {
-  request_id:    string       // UUID v4 — unique per request (idempotency)
-  bsp_version:   string       // Protocol version (semver) — e.g., "0.2.0"
-  timestamp:     string       // ISO8601 — when the request was constructed
-
-  // Who is making the request
-  requester: {
-    ieo_id:      string       // Institution's UUID
-    ieo_domain:  string       // e.g., "fleury.bsp"
-    signature:   string       // Ed25519 signature of (request_id + timestamp + beo_id)
-  }
-
-  // What is being requested
-  intent:        BSPIntent    // SUBMIT_RECORD | READ_RECORDS | ANALYZE_VITALITY | ...
-
-  // Who the request targets
-  target: {
-    beo_id:      string       // Target BEO UUID
-    beo_domain:  string       // e.g., "andre.bsp"
-  }
-
-  // Authorization proof
-  auth: {
-    consent_token_id: string  // ConsentToken issued by the BEO holder
-  }
-
-  // Intent-specific payload
-  payload:       object       // See intent-specific schemas below
-}
-```
-
-### BSPResponse Schema
-
-```typescript
-interface BSPResponse {
-  request_id:  string         // Echo of the original request_id
-  status:      "SUCCESS" | "ERROR"
-  timestamp:   string         // ISO8601
-
-  // On success
-  payload:     object | null  // Intent-specific response data
-
-  // On error
-  error: {
-    code:      string         // Machine-readable error code
-    message:   string         // Human-readable description
-    field:     string | null  // Specific field that failed (validation errors)
-    retryable: boolean        // Whether retrying the request makes sense
-  } | null
-}
-```
+All exchange operations are subject to the **AccessControl** smart contract. The BEO holder's consent is required for every data transaction involving their biological data.
 
 ---
 
-## 2. Authentication Model — Double Verification
+## Core Principle
 
-Every BSPRequest is authenticated **twice**:
+> No system — laboratory, platform, AI engine, or the Ambrósio Institute itself — can access a BEO without explicit authorization from the holder, enforced by the AccessControl smart contract on Arweave.
 
-1. **ConsentToken**: Proof from the blockchain that the BEO holder authorized this IEO for this intent and category.
-2. **IEO Signature**: The institution's cryptographic signature on the request — proves the request was made by the actual institution, not an impostor.
-
-```
-AccessControl.verify(consent_token_id, ieo_id, beo_id, intent, category)
-  → VALID: proceed
-  → INVALID: reject with specific error code (TOKEN_REVOKED, etc.)
-
-IEO Signature.verify(request_id + timestamp + beo_id, ieo_public_key)
-  → VALID: proceed
-  → INVALID: reject with IEO_SIGNATURE_INVALID
-```
+The consent requirement is **mathematical**, not institutional. The smart contract rejects unauthorized transactions automatically — no human review, no backend server, no institutional trust required.
 
 ---
 
-## 3. Intent Reference
+## Consent Token
 
-### `SUBMIT_RECORD` — Write a BioRecord
+Before any exchange operation, the executing system must hold a valid **ConsentToken** signed by the BEO holder.
 
 ```typescript
-// Request Payload
-{
-  records: [{
-    biomarker:    string    // BSP code — e.g., "BSP-LA-004"
-    value:        number    // Measured value
-    unit:         string    // Standardized unit
-    collected_at: string    // ISO8601 — when sample was collected
-    ref_range: {
-      optimal:    string
-      functional: string
-      deficiency: string
-      toxicity:   string | null
-    }
-    metadata:     object    // Optional: device model, method, batch number
-  }]
-}
-
-// Response Payload (SUCCESS)
-{
-  submission: {
-    record_ids:   string[]  // Arweave transaction IDs — permanent
-    stored_at:    string    // ISO8601
-    arweave_txs:  string[]  // One per record (or one batch transaction)
-  }
+ConsentToken {
+  token_id:    string       // Unique token identifier
+  beo_id:      string       // The BEO this token grants access to
+  ieo_id:      string       // The institution this token is granted to
+  intents:     BSPIntent[]  // Authorized operations (e.g. ["SUBMIT_RECORD"])
+  categories:  string[]     // Authorized BSP categories (e.g. ["BSP-LA", "BSP-GL"])
+  granted_at:  ISO8601      // When the holder granted this token
+  expires_at:  ISO8601      // When this token expires (null = persistent)
+  revoked:     boolean      // Whether this token has been revoked
+  signature:   string       // Holder's cryptographic signature
+  arweave_tx:  string       // Arweave transaction ID — the on-chain record
 }
 ```
 
-**Batch submissions**: Multiple BioRecords can be submitted in a single request. More efficient and lower Arweave cost than individual submissions.
+### Token Properties
+
+| Property | Description |
+|---|---|
+| **Scoped** | Limited to specific intents and data categories |
+| **Time-limited** | Expire at `expires_at` — automatically invalid after |
+| **Revocable** | Holder can revoke at any time, recorded on-chain |
+| **Auditable** | All grants, uses, and revocations permanently on Arweave |
+| **Non-transferable** | Tokens are bound to a specific IEO — cannot be shared |
 
 ---
 
-### `READ_RECORDS` — Read BioRecords
+## Exchange Operations
+
+### SUBMIT_RECORD
+
+Submit a biological measurement to a BEO.
+
+**Required consent:** `SUBMIT_RECORD` intent + authorized category matching the biomarker
 
 ```typescript
-// Request Payload
-{
+// Request
+SubmitRecordRequest {
+  token:    ConsentToken    // Valid, non-expired, non-revoked consent token
+  record:   BioRecord       // The BioRecord to submit
+}
+
+// Response
+SubmitRecordResponse {
+  success:    boolean
+  record_id:  string        // Assigned record_id
+  arweave_tx: string        // Arweave transaction ID — permanent record
+  timestamp:  ISO8601
+}
+```
+
+**Validation rules:**
+1. ConsentToken must be valid, not expired, not revoked
+2. Token's `intents` must include `SUBMIT_RECORD`
+3. Token's `categories` must include the record's `category`
+4. Record's `beo_id` must match token's `beo_id`
+5. Record must pass schema validation (all required fields present)
+6. Biomarker code must exist in the BSP taxonomy
+7. Value must be within plausible physiological range
+
+---
+
+### READ_RECORDS
+
+Read BioRecords from a BEO.
+
+**Required consent:** `READ_RECORDS` intent + authorized categories
+
+```typescript
+// Request
+ReadRecordsRequest {
+  token:      ConsentToken   // Valid consent token
+  beo_id:     string
   filters: {
-    categories:  string[]       // BSP categories to include (e.g., ["BSP-LA", "BSP-HM"])
-    biomarkers:  string[]       // Specific codes (optional)
-    period: {
-      from:      string | null  // ISO8601
-      to:        string | null  // null = up to now
-    }
-    limit:       number         // Max records per page (default 100, max 500)
-    offset:      number         // For pagination
+    categories:  string[]    // Filter by BSP category (optional)
+    biomarkers:  string[]    // Filter by specific biomarker codes (optional)
+    from:        ISO8601     // Records after this timestamp (optional)
+    to:          ISO8601     // Records before this timestamp (optional)
+    status:      RecordStatus // ACTIVE | SUPERSEDED | PENDING (default: ACTIVE)
+    limit:       number      // Max records to return (default: 100)
+    offset:      number      // Pagination offset
   }
 }
 
-// Response Payload (SUCCESS)
-{
-  records: [{
-    record_id:    string
-    biomarker:    string
-    value:        number
-    unit:         string
-    collected_at: string
-    submitted_at: string
-    source: {
-      ieo_id:     string
-      ieo_domain: string
-    }
-    ref_range:    object
-    status:       "CURRENT" | "SUPERSEDED"
-  }]
-  total_count: number
-  has_more:    boolean
+// Response
+ReadRecordsResponse {
+  beo_id:   string
+  records:  BioRecord[]
+  total:    number
+  has_more: boolean
 }
 ```
 
 ---
 
-### `ANALYZE_VITALITY` — Request AVA Analysis
+### REQUEST_CONSENT
 
-Available only to PLATFORM IEOs integrated with AVA. Requires active `ANALYZE_VITALITY` consent.
+An institution requests a consent token from a BEO holder.
+
+This operation is initiated by the institution but must be completed by the BEO holder — the token does not exist until the holder signs.
 
 ```typescript
-// Request Payload
-{
-  // no additional payload required — consent token defines scope
+// Consent Request (sent to holder)
+ConsentRequest {
+  request_id:  string
+  ieo_id:      string
+  ieo_domain:  string       // e.g. "fleury.bsp"
+  ieo_name:    string       // e.g. "Fleury Laboratórios"
+  intents:     BSPIntent[]  // What access is being requested
+  categories:  string[]     // Which data categories
+  expires_in:  number       // Requested duration in seconds (null = persistent)
+  reason:      string       // Human-readable explanation
 }
 
-// Response Payload (SUCCESS)
-{
-  analysis_id: string
-  sva_score: {
-    composite:      number    // 0–100
-    bio_age:        number    // Years
-    pace:           number    // 1.0 = normal; 0.8 = aging slower
-    cardiovascular: number    // 0–100
-    metabolic:      number    // 0–100
-    neurological:   number    // 0–100
-    immunological:  number    // 0–100
-    reserve:        number    // Population percentile (0–100)
-  }
-  confidence:     number      // 0.0–1.0 — based on data completeness
-  processed_at:   string
+// Holder response — grant
+ConsentGrant {
+  request_id: string
+  token:      ConsentToken  // Signed by holder's private key
+}
+
+// Holder response — deny
+ConsentDenial {
+  request_id: string
+  reason:     string        // Optional
 }
 ```
 
 ---
 
-### `REQUEST_SCORE` — Request SVA Score
+### REVOKE_CONSENT
+
+The BEO holder revokes a previously granted consent token.
 
 ```typescript
-// Returns SVA composite score without triggering full AVA analysis
-// Response Payload (SUCCESS)
-{
-  sva_composite:  number      // 0–100
-  bio_age:        number      // Years
-  computed_at:    string      // When this score was last computed
+// Revocation (signed by holder)
+ConsentRevocation {
+  token_id:   string        // The token being revoked
+  beo_id:     string
+  reason:     string        // Optional
+  revoked_at: ISO8601
+  signature:  string        // Holder's signature
+  arweave_tx: string        // On-chain record
 }
 ```
 
+After revocation, any further use of the token is rejected by the AccessControl smart contract.
+
 ---
 
-### `EXPORT_DATA` — Export All Data
+### ADD_INTENT
 
-Always available to BEO holders. Cannot be restricted by any IEO.
+Add a new authorized operation to an existing consent token without revoking and re-issuing it.
 
 ```typescript
-// Response Payload (SUCCESS)
-{
-  export_id:      string
-  download_url:   string    // Signed URL — expires in 24h
-  format:         "JSON" | "CSV" | "FHIR_R4"
-  record_count:   number
-  size_bytes:     number
-  expires_at:     string
+// Request (signed by holder)
+AddIntentRequest {
+  token_id:   string        // The consent token to modify
+  beo_id:     string
+  intent:     BSPIntent     // The intent to add (e.g. "READ_RECORDS")
+  signature:  string        // Holder's signature
+}
+
+// Response
+AddIntentResponse {
+  success:    boolean
+  token_id:   string
+  intents:    BSPIntent[]   // Updated list of intents on the token
+  arweave_tx: string        // On-chain record of the modification
+  timestamp:  ISO8601
 }
 ```
 
----
+**Validation rules:**
 
-## 4. Error Codes
-
-| Code | Category | Description | Retryable |
-|------|----------|-------------|-----------|
-| `TOKEN_NOT_FOUND` | Auth | ConsentToken ID does not exist | No |
-| `TOKEN_REVOKED` | Auth | Token was revoked by the BEO holder | No |
-| `TOKEN_EXPIRED` | Auth | Token's `expires_at` has passed | No |
-| `INTENT_NOT_AUTHORIZED` | Auth | Requested intent not in token scope | No |
-| `CATEGORY_NOT_AUTHORIZED` | Auth | Category not in token scope | No |
-| `IEO_SIGNATURE_INVALID` | Auth | IEO signature verification failed | No |
-| `IEO_NOT_FOUND` | Auth | IEO domain not found in IEORegistry | No |
-| `BEO_LOCKED` | State | BEO is in LOCKED state | No |
-| `SCHEMA_VALIDATION_FAILED` | Data | BioRecord failed schema validation | Fix data |
-| `BIOMARKER_CODE_INVALID` | Data | BSP code does not exist in taxonomy | Fix code |
-| `UNIT_INVALID` | Data | Unit not valid for this biomarker | Fix unit |
-| `ARWEAVE_WRITE_FAILED` | Infra | Temporary Arweave write failure | **Yes** |
-| `RATE_LIMIT_EXCEEDED` | Infra | Too many requests (per IEO per minute) | **Yes** |
-| `BSP_VERSION_MISMATCH` | Protocol | Client version incompatible | Update SDK |
+1. Token must exist, not be expired or revoked
+2. Caller must be the BEO holder (signature verification)
+3. Intent must be a valid BSPIntent type
+4. Intent must not already exist on the token (idempotent — returns success if duplicate)
 
 ---
 
-## 5. SDK Integration
+### REMOVE_INTENT
 
-```python
-from bsp_sdk import BSPClient
+Remove an authorized operation from an existing consent token. If the last intent is removed, the token becomes effectively inactive (no operations authorized) but is not revoked.
 
-client = BSPClient(
-    ieo_domain  = "yourlaboratory.bsp",
-    private_key = YOUR_PRIVATE_KEY,
-)
+```typescript
+// Request (signed by holder)
+RemoveIntentRequest {
+  token_id:   string        // The consent token to modify
+  beo_id:     string
+  intent:     BSPIntent     // The intent to remove
+  signature:  string        // Holder's signature
+}
 
-# Submit
-result = client.submit_biorecord(
-    beo_domain    = "patient.bsp",
-    consent_token = token_id,
-    biomarker     = "BSP-HM-001",
-    value         = 13.8,
-    unit          = "g/dL",
-    collected_at  = "2026-02-26T08:00:00Z",
-    ref_range     = { "optimal": "13.5-17.5", "functional": "12.0-17.5" }
-)
-print(result.submission.record_ids)  # Permanent IDs on Arweave
-
-# Read
-records = client.read_records(
-    beo_domain    = "patient.bsp",
-    consent_token = token_id,
-    filters = { "categories": ["BSP-HM"], "period": { "from": "2025-01-01" } }
-)
+// Response
+RemoveIntentResponse {
+  success:    boolean
+  token_id:   string
+  intents:    BSPIntent[]   // Updated list of intents on the token
+  arweave_tx: string        // On-chain record of the modification
+  timestamp:  ISO8601
+}
 ```
+
+**Validation rules:**
+
+1. Token must exist, not be expired or revoked
+2. Caller must be the BEO holder (signature verification)
+3. Intent must currently exist on the token (returns error `BSP-E-013` if not found)
+
+---
+
+## Error Codes
+
+| Code | Description |
+|---|---|
+| `BSP-E-001` | Invalid or missing consent token |
+| `BSP-E-002` | Token expired |
+| `BSP-E-003` | Token revoked |
+| `BSP-E-004` | Intent not authorized by token |
+| `BSP-E-005` | Category not authorized by token |
+| `BSP-E-006` | BEO not found |
+| `BSP-E-007` | IEO not found or suspended |
+| `BSP-E-008` | Schema validation failure |
+| `BSP-E-009` | Biomarker code not found in taxonomy |
+| `BSP-E-010` | Value outside plausible physiological range |
+| `BSP-E-011` | Arweave write failure — retry |
+| `BSP-E-012` | Signature verification failure |
+| `BSP-E-013` | Intent not found on token (for removeIntent) |
+| `BSP-E-014` | BEO is locked — all exchange operations suspended |
+
+---
+
+## SDK Usage
+
+```typescript
+// TypeScript — Submit a BioRecord
+import { ExchangeClient, ConsentManager } from '@bsp/sdk'
+
+// Check if we have a valid consent token
+const consentManager = new ConsentManager({ ieoId: 'my-lab.bsp' })
+const token = await consentManager.getToken(beoId)
+
+if (!token || token.isExpired()) {
+  // Request new consent from user
+  const request = await consentManager.requestConsent(beoId, {
+    intents: ['SUBMIT_RECORD'],
+    categories: ['BSP-GL', 'BSP-HM'],
+    expiresIn: 365 * 24 * 60 * 60  // 1 year
+  })
+  // User must approve — returns token when approved
+  token = await consentManager.waitForApproval(request.request_id)
+}
+
+// Submit with valid token
+const client = new ExchangeClient()
+const result = await client.submit(record, token)
+```
+
+---
+
+*Ambrósio Institute · ambrosioinstitute.org · biologicalsovereigntyprotocol.com*

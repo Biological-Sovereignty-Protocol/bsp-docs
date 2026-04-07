@@ -5,6 +5,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [0.2.0] — 2026-04-06
+
+Synced all documentation from BSP website (biologicalsovereigntyprotocol.com).
+
+### Updated
+
+- **Whitepaper**: Sovereign Cryptographic Erasure (Section 4.4), updated vision
+- **BEO spec**: Lock/Unlock operations, updated lifecycle
+- **IEO spec**: Updated certification levels and registration flow
+- **Exchange spec**: ADD_INTENT/REMOVE_INTENT operations
+- **Governance spec**: Full multisig 2-of-3 proposal system
+- **Ecosystem flow**: Updated architecture diagrams
+- **Security & Blockchain**: Updated Arweave and double-auth model
+- **GitHub Architecture**: Repository structure and CI/CD docs
+
+### Added
+
+- **BSP Domain spec** (`docs/reference/bsp-domain.md`): Domain transfer flow, `.bsp` namespace operations
+- **BioRecord spec** (`docs/reference/biorecord.md`): Schema, taxonomy codes, versioning
+- **Privacy Policy** (`docs/legal/privacy.md`): Right to Erasure via Cryptographic Erasure, LGPD/GDPR
+- **Terms of Service** (`docs/legal/terms.md`): Data Sovereignty clarification
+
+---
+
 ## [0.1.0] — 2026-03-24
 
 Initial public release of BSP documentation.

@@ -1,204 +1,195 @@
+---
+title: IEO — Institutional Entity Object
+---
+
 # IEO — Institutional Entity Object
 
-The **Institutional Entity Object (IEO)** is the identity of any organization, system, or professional that interacts with biological data in the BSP ecosystem — from a clinical laboratory to an AI platform.
-
-> "Every institution that touches human biology needs a language to speak it. The IEO is that identity."
+> Version 0.2 | Ambrósio Institute
 
 ---
 
-## 1. Overview
+## Overview
 
-Any institution can create an IEO — directly, without approval, and at minimal cost. The IEO establishes:
-- Cryptographic identity for the institution
-- Which actions the institution can perform
-- The institution's operational record
-- Optional BSP Certification status (voluntary quality seal)
+The **Institutional Entity Object (IEO)** represents any organization, system, or professional that interacts with biological data on behalf of, or with the consent of, a BEO holder.
 
----
+Every institution in the BSP ecosystem — from a national hospital chain to a wearable device manufacturer to an independent physician — is represented as an IEO.
 
-## 2. IEO Types
-
-| Code | Type | Primary Role |
-|------|------|-------------|
-| `LAB` | Laboratory | Submit BioRecords — the primary data source |
-| `HOSP` | Hospital & Health System | Submit + Read records across clinical domains |
-| `WEAR` | Wearable & Device | Submit continuous Level 4 (Device) data daily |
-| `PHY` | Physician & Practitioner | Read records to interpret patient history |
-| `INS` | Health Insurer | Read SVA aggregate score only — never raw data |
-| `RES` | Research Institution | Anonymized aggregate access for open science |
-| `PLT` | Platform & AI System | Analyze vitality, request SVA scores |
+> **Creating an IEO is open to any institution.**
+> BSP Certification is voluntary — but unlocks meaningful benefits within the ecosystem.
 
 ---
 
-## 3. Permission Matrix
-
-| Action | LAB | HOSP | WEAR | PHY | INS | RES |
-|--------|:---:|:----:|:----:|:---:|:---:|:---:|
-| Submit BioRecords | ✓ | ✓ | ✓ | ✓* | — | — |
-| Read BEO (with token) | — | ✓ | — | ✓ | — | — |
-| Aggregate anonymized data | — | — | — | — | ✓* | ✓ |
-| Analyze vitality (AVA) | — | — | — | ✓ | — | — |
-| Request SVA score | — | — | — | ✓ | ✓* | — |
-
-*PHY: clinical assessments only (BSP-CL) | INS: SVA composite only with user opt-in | RES: anonymized aggregate only
-
-**Important**: Only BEO holders can issue or revoke consent tokens. No IEO can grant access to another user's data.
-
----
-
-## 4. IEO Complete Schema
+## IEO Object Schema
 
 ```typescript
-interface IEO {
-  // Identity
-  ieo_id:        string    // Universally unique institutional identifier
-  domain:        string    // .bsp address — e.g., "fleury.bsp"
-  display_name:  string    // Full legal name
-  ieo_type:      IEOType   // LABORATORY | HOSPITAL | WEARABLE | PHYSICIAN | INSURER | RESEARCH | PLATFORM
-  country:       string    // ISO3166 country code
-  jurisdiction:  string    // Regulatory jurisdiction
-  legal_id:      string    // CNPJ (BR) / EIN (US) / VAT (EU) etc.
-  public_key:    string    // Institutional public key for signed submissions
-  created_at:    string    // ISO8601 registration timestamp
-  version:       string    // BSP version at time of creation
+IEO {
+  // ─── IDENTITY ──────────────────────────────────────────────────
+  ieo_id:       string     // Universally unique institutional identifier
+  domain:       string     // .bsp address — e.g. "fleury.bsp"
+  display_name: string     // Full legal name of the institution
+  ieo_type:     IEOType    // LABORATORY | HOSPITAL | WEARABLE | PHYSICIAN |
+                           // INSURER | RESEARCH | PLATFORM
+  country:      ISO3166    // Country of primary operation
+  jurisdiction: string     // Regulatory jurisdiction
+  legal_id:     string     // CNPJ (BR) / EIN (US) / VAT (EU) etc.
+  public_key:   string     // Institutional public key for signed submissions
+  created_at:   ISO8601    // IEO registration timestamp
+  version:      semver     // BSP version at time of creation
 
-  // Certification
+  // ─── CERTIFICATION ─────────────────────────────────────────────
   certification: {
-    level:        "UNCERTIFIED" | "BASIC" | "ADVANCED" | "FULL" | "DEVICE" | "RESEARCH"
-    granted_at:   string         // Date certification was granted
-    expires_at:   string         // Annual renewal date
-    categories:   string[]       // Authorized BSP categories (e.g., ["BSP-LA", "BSP-HM"])
-    intents:      BSPIntent[]    // Authorized exchange intents
-    restrictions: string[]       // Explicit prohibitions, if any
-    certified_by: string         // Institute auditor reference
-    audit_ref:    string         // Audit transaction ID on Arweave
+    level:        CertLevel    // BASIC | ADVANCED | FULL | RESEARCH
+    granted_at:   ISO8601
+    expires_at:   ISO8601      // Annual renewal
+    categories:   string[]     // Authorized BSP categories (e.g. ["BSP-LA", "BSP-HM"])
+    intents:      BSPIntent[]  // Authorized exchange intents
+    restrictions: string[]     // Explicit prohibitions if any
+    certified_by: string       // Institute auditor reference
+    audit_ref:    string       // Audit transaction ID on Arweave
   }
 
-  // Operational Record
+  // ─── OPERATIONAL RECORD ────────────────────────────────────────
   operations: {
-    biorecords_submitted: number  // Total BioRecords submitted to date
-    last_submission:      string  // Timestamp of most recent submission
-    compliance_rate:      number  // Schema compliance rate (0.0–1.0)
-    active_consents:      number  // Current open consent tokens
-    complaints:           number  // Complaints received
+    biorecords_submitted: number   // Total BioRecords submitted to date
+    last_submission:      ISO8601
+    compliance_rate:      float    // Schema compliance rate (0.0–1.0)
+    active_consents:      number   // Current open consent tokens
+    complaints:           number
+    audits:               Audit[]
   }
 
-  // Contacts
+  // ─── CONTACTS ──────────────────────────────────────────────────
   contacts: {
-    technical_lead:  ContactRef  // Technical integration point of contact
-    compliance_lead: ContactRef  // Regulatory and compliance contact
-    api_endpoint:    string      // Primary BSP API endpoint URL
-    webhook_url:     string      // Notification webhook (optional)
+    technical_lead:   ContactRef
+    compliance_lead:  ContactRef
+    api_endpoint:     string     // Primary BSP API endpoint URL
+    webhook_url:      string     // Notification webhook (optional)
   }
 
-  // Status
-  status:            "ACTIVE" | "SUSPENDED" | "REVOKED" | "PENDING"
-  suspension_reason: string | null
-  revocation_reason: string | null
+  // ─── STATUS ────────────────────────────────────────────────────
+  status:             IEOStatus  // ACTIVE | SUSPENDED | REVOKED | PENDING
+  suspension_reason:  string | null
+  revocation_reason:  string | null
 }
 ```
 
 ---
 
-## 5. Certification Levels
+## IEO Types
 
-Certification is **voluntary** — uncertified IEOs can still participate with user consent. Certification adds the quality seal, directory listing, and AVA pipeline access.
+### LAB — Clinical & Diagnostic Laboratory (`IEOType.LABORATORY`)
 
-| Level | Code | Data Access | Target Institution |
-|-------|------|-------------|------------------|
-| Uncertified | — | Any, with user consent | Any institution starting out |
-| Basic | BSP-1 | L2 Standard biomarkers | Clinical labs, routine diagnostics |
-| Advanced | BSP-2 | L1 Core + L2 Standard | Advanced longevity clinics |
-| Full Spectrum | BSP-3 | L1 + L2 + L3 Extended | Comprehensive research centers |
-| Device | BSP-4 | L4 Device (continuous) | Wearable manufacturers |
+Clinical and diagnostic laboratories — the primary source of BioRecords in the BSP ecosystem.
 
----
+| Property | Rule |
+|---|---|
+| Default authorized levels | L2 Standard |
+| Advanced authorized levels | L1 Core, L3 Extended on certification |
+| Can READ BEOs | Never — submission is write-only |
+| Domain format | `institutionname.bsp` (e.g. `fleury.bsp`) |
+| Renewal | Annual compliance audit |
 
-## 6. Special Restrictions
+### HSP — Hospital & Health System (`IEOType.HOSPITAL`)
 
-### Wearable IEOs
-Wearable IEOs can **never** be granted `READ_RECORDS` access under any circumstances — not even with explicit user consent. Devices produce data; they do not consume it. This restriction is permanent and encoded in the `IEORegistry` contract.
+Hospitals and health systems. Authorized across multiple taxonomy levels simultaneously. May credential physicians as sub-IEOs.
 
-### Insurer IEOs
-Insurer IEOs are permanently prohibited from:
-- Using BSP data for insurance underwriting
-- Accessing raw BioRecords (only SVA composite score, with explicit user opt-in)
-- Storing raw BSP data — only anonymized insights
+| Property | Rule |
+|---|---|
+| Default authorized levels | L1 Core + L2 Standard |
+| Advanced authorized levels | L3 Extended, L4 Device on certification |
+| Can READ BEOs | With active consent token, time-limited |
+| Physician sub-IEOs | `dr.silva@hcor.bsp` format |
 
-This restriction is enforced at the smart contract level. Violation results in immediate permanent revocation.
+### WRB — Wearable & Device (`IEOType.WEARABLE`)
 
----
+Hardware and software companies producing wearable devices and continuous monitoring systems.
 
-## 7. Creating an IEO
+| Property | Rule |
+|---|---|
+| Authorized levels | L4 Device (BSP-DV) **exclusively** |
+| Submission frequency | Daily consolidated records per user |
+| Can READ BEOs | **Never** — permanent restriction, cannot be overridden by user consent |
+| SDK requirement | Must use official BSP Device SDK |
 
-```python
-from bsp_sdk import IEOBuilder, IEOType
+> **Critical:** Wearable IEOs are the only IEO type that may never be granted READ_RECORDS access under any circumstances.
 
-ieo = IEOBuilder(
-    domain      = "yourlaboratory.bsp",   # Check availability first
-    name        = "Your Laboratory Name",
-    ieo_type    = IEOType.LABORATORY,
-    jurisdiction = "BR",
-    legal_id    = "12.345.678/0001-99",   # CNPJ, EIN, VAT, etc.
-    contact     = "tech@yourlaboratory.com",
-    website     = "https://yourlaboratory.com",
-).build()
+### PHY — Physician & Practitioner (`IEOType.PHYSICIAN`)
 
-result = ieo.register()
+Licensed physicians and health practitioners. Unique in that READ_RECORDS is their primary function.
 
-print(result.ieo_id)       # Permanent UUID on Arweave
-print(result.domain)       # yourlaboratory.bsp
-print(result.arweave_tx)   # On-chain transaction ID
-print(result.status)       # ACTIVE (UNCERTIFIED by default)
+| Property | Rule |
+|---|---|
+| Primary function | READ_RECORDS with consent token |
+| Submission rights | Clinical assessments only (BSP-CL) |
+| Consent model | Time-limited and scope-limited tokens |
+| Credential verification | Medical license number required at registration |
 
-# Save the private key — it's the only way to sign operations as this IEO
-# result.private_key → store in .env as BSP_IEO_PRIVATE_KEY
-# result.seed_phrase → store offline
-```
+### INS — Health Insurer (`IEOType.INSURER`)
 
----
+Health insurance companies. Operate under the most restrictive access model.
 
-## 8. Onboarding for Certification
+| Property | Rule |
+|---|---|
+| Read access | Aggregate anonymized data only |
+| Individual access | Only with explicit ongoing consent, never automatic |
+| **PROHIBITED** | Cannot use BSP data for underwriting, coverage denial, or premium calculation based on individual biological risk |
 
-### Standard Laboratory Path (BSP-1)
+> This restriction is encoded in the IEO contract and enforced at the smart contract level.
 
-1. **Application** — Submit via the Institute portal at `biologicalsovereigntyprotocol.com/certify`. Requires: legal entity ID, contacts, list of analytical categories, requested certification level.
-2. **Document Review** — Institute reviews within 5 business days: legal legitimacy, regulatory standing, capability match.
-3. **Technical Audit** — Access to the BSP Compliance Test Suite. Must submit 100 syntactically valid BioRecords across all requested categories using the SDK in sandbox mode.
-4. **IEO Update** — On approval, Institute updates the institution's IEO on Arweave to `BSP-CERTIFIED` status with authorized categories and audit reference.
-5. **Production Integration** — SDK production credentials issued. Badge becomes active and verifiable on-chain.
-6. **Annual Renewal** — Fails → status changes to `SUSPENDED`.
+### RES — Research Institution (`IEOType.RESEARCH`)
 
-### Suspension vs. Revocation
+Universities, research centers, and clinical trial organizations.
 
-| Suspension (Temporary) | Revocation (Permanent) |
-|----------------------|----------------------|
-| Failed annual renewal | Repeated schema violations |
-| Outstanding fees | Unauthorized use of BEO data |
-| Compliance audit failure | Using BSP data for underwriting (insurers) |
-| Contacts not current | Selling BSP data to third parties |
+| Property | Rule |
+|---|---|
+| Data access | Anonymized aggregate with explicit opt-in |
+| Individual identification | Structurally impossible — BEO references stripped |
+| Commercial restriction | Cannot commercialize raw BSP data access |
 
----
+### PLT — Digital Health Platform & AI System (`IEOType.PLATFORM`)
 
-## 9. Public Registry & Certification Badge
+Digital health platforms, telemedicine services, and AI systems. This is the category for AVA/SVA implementations.
 
-Every active IEO appears in the BSP Public Registry, queryable by anyone:
-
-```html
-<!-- Embeddable BSP Certification Badge -->
-<a href="https://biologicalsovereigntyprotocol.com/registry/fleury.bsp">
-  <img src="https://biologicalsovereigntyprotocol.com/badges/BSP-Compliant-Advanced.svg"
-       alt="BSP-Compliant Advanced — Certified by Ambrósio Institute"
-       width="200" />
-</a>
-```
-
-Badge status updates automatically from the on-chain registry. Expired or suspended IEOs display a different badge state.
+| Property | Rule |
+|---|---|
+| Primary function | ANALYZE_VITALITY and REQUEST_SCORE intents |
+| Read access | With persistent user consent — refreshable |
+| Write access | Cannot — platforms interpret, not measure |
 
 ---
 
-## See Also
+## Certification Levels
 
-- [BEO Specification →](./beo.md)
-- [ConsentToken & Access Control →](./consent-token.md)
-- [Certification Guide →](../guides/certification.md)
+| Level | Requirements | What it unlocks |
+|---|---|---|
+| **BSP-Compliant Basic** | L2 Standard biomarkers only | Diretory listing, basic badge |
+| **BSP-Compliant Advanced** | L1 Core + L2 Standard | AVA data feed, advanced badge |
+| **BSP-Compliant Full-Spectrum** | All levels | Full ecosystem integration |
+| **BSP Research Partner** | Research IEO with BIP contribution | Anonymized research data access |
+
+**Certification is voluntary.** Any institution can participate in the BSP ecosystem without certification — but certified institutions:
+- Appear in the official directory
+- Display a verifiable on-chain badge
+- Have their data feed into AVA analysis
+- Are recommended by the Ambrósio OS
+
+Non-certified institutions can operate but the Ambrósio app displays a "unverified source" notice.
+
+---
+
+## Exchange Intents
+
+Each IEO type is authorized for specific exchange intents:
+
+| Intent | Description | Authorized IEO Types |
+|---|---|---|
+| `SUBMIT_RECORD` | Submit biological measurements to a BEO | LAB, HSP, WRB, PHY |
+| `READ_RECORDS` | Read BioRecords from a BEO | PHY, PLT, INS (aggregate only) |
+| `REQUEST_CERTIFICATION` | Apply for BSP certification | All types |
+| `ANALYZE_VITALITY` | Submit BioRecords for AVA analysis | PLT |
+| `REQUEST_SCORE` | Request SVA score generation | PLT |
+| `SUBMIT_BIP` | Submit a BSP Improvement Proposal | All types |
+
+---
+
+*Ambrósio Institute · ambrosioinstitute.org · biologicalsovereigntyprotocol.com*

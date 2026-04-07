@@ -1,12 +1,15 @@
-# Security & Blockchain
-
-This guide explains the cryptographic and blockchain foundations of the BSP — how keys work, why Arweave was chosen, how the smart contracts enforce consent, and how each actor connects without needing permission from any central authority.
-
 ---
+title: "Security & Blockchain — BSP"
+description: "Cryptographic security model, key management, and Arweave blockchain integration in BSP."
+---
+
+# Keys, Blockchain & Access
+
+> "How users, laboratories, and systems connect to the ecosystem — decentralized, without a central server, without an intermediary, without prior permission."
 
 ## Part 1: Cryptographic Keys — The Foundation
 
-The BSP is built on a single core principle: **no central authority controls access to your biological data. You do.** The instrument of that control is your cryptographic key pair.
+BSP is built on a single principle: **no central authority controls access to your biological data. You do.** The instrument of that control is your cryptographic key pair.
 
 ### The Key Pair
 
@@ -14,69 +17,61 @@ The BSP is built on a single core principle: **no central authority controls acc
 |--|------------|-------------|
 | **What it is** | Your address in the BSP ecosystem | Your control key |
 | **Who sees it** | Anyone — shared freely | Only you — never leaves your device |
-| **Used for** | Labs and systems identify your BEO and encrypt data | Signing authorizations, decrypting your BioRecords |
-| **Stored in** | BEORegistry on Arweave | Encrypted in your app, protected by biometric/password |
+| **Used for** | Labs encrypt BioRecords before submission | Signing authorizations, decrypting your BioRecords |
+| **Stored in** | BEORegistry on Arweave | Encrypted in your app (hardware enclave + biometric) |
 
-### Key Generation
-
-Keys are generated entirely on the user's device:
+### Key Generation (Ed25519)
 
 ```javascript
-// 1. Generate 256 bits of secure entropy
-const entropy = crypto.getRandomValues(new Uint8Array(32))
-
-// 2. Derive 24-word BIP-39 seed phrase
+// 100% on-device
+const entropy  = crypto.getRandomValues(new Uint8Array(32))
 const mnemonic = bip39.entropyToMnemonic(entropy)
+const seed     = await bip39.mnemonicToSeed(mnemonic)
+const keyPair  = ed25519.fromSeed(seed.slice(0, 32))
 
-// 3. Derive Ed25519 key pair
-const seed = await bip39.mnemonicToSeed(mnemonic)
-const keyPair = ed25519.fromSeed(seed.slice(0, 32))
-
-// 4. Private key stays on device — never transmitted
-const privateKey = keyPair.secretKey  // 64 bytes
-
-// 5. Public key registered on Arweave
-const publicKey = keyPair.publicKey   // 32 bytes
+const privateKey = keyPair.secretKey  // 64 bytes — stays on device always
+const publicKey  = keyPair.publicKey  // 32 bytes — registered on Arweave
 ```
 
-**Why Ed25519?** Compact signatures (64 bytes), high performance, and proven resistance in low-power environments.
+**Why Ed25519?** Compact 64-byte signatures, high performance, proven resistance in low-power environments (mobile).
 
 ---
 
-## Part 2: Social Recovery — Key Recovery Without a Central Server
+## Part 2: Social Recovery — Without a Central Server
 
-Losing your private key in a self-custody system normally means losing access forever. BSP solves this with **Social Recovery** — no central server needed.
+Losing your private key means permanent loss of access without a backup. BSP solves this with **Social Recovery** via Shamir Secret Sharing.
 
 ### How It Works
 
-The user designates 3 guardians (trusted friends, physicians, or platforms). Using **Shamir Secret Sharing**, the private key is mathematically split into 3 fragments:
+```javascript
+// Key is split into 3 fragments — any 2 can reconstruct it
+const fragments = shamirSplit(recovery_key, threshold=2, shares=3)
 
-```
-Key = shamirSplit(secret=K, threshold=2, shares=3)
-Fragment_A → encrypted with Guardian 1's public key
-Fragment_B → encrypted with Guardian 2's public key  
-Fragment_C → encrypted with Guardian 3's public key
+// Each fragment encrypted with the guardian's public key
+guardian_1.fragment = encrypt(fragments[0], guardian_1_public_key)
+guardian_2.fragment = encrypt(fragments[1], guardian_2_public_key)
+guardian_3.fragment = encrypt(fragments[2], guardian_3_public_key)
+
+// Stored on Arweave — publicly visible, unreadable without guardian's private key
 ```
 
-- Fragments are stored on Arweave — publicly visible, but encrypted and unreadable.
-- **Any 2 of the 3 fragments** reconstruct the original key.
-- No guardian can act alone.
-- The Ambrósio Institute is not in this flow at any stage.
+- **No guardian can act alone** — 2-of-3 required
+- **The Institute is never in this flow** at any stage
+- **Fragments stored on Arweave** — permanent, encrypted, accessible only to the guardian
 
 ### Recovery Flow
 
-1. User opens app on new device — app detects no private key.
-2. New key pair is generated on the new device.
-3. A `RECOVERY_REQUEST` transaction is posted on Arweave — notifying guardians.
-4. Two guardians decrypt their fragments and post `GUARDIAN_CONFIRM` transactions.
-5. The BEORegistry updates the BEO with the new public key.
-6. User regains full access.
+```
+1. User opens app on new device → generates new key pair locally
+2. Posts RECOVERY_REQUEST transaction to Arweave
+3. Two guardians decrypt their fragment and post GUARDIAN_CONFIRM transactions
+4. BEORegistry updates the BEO with the new public key
+5. Old key is permanently invalidated
+```
 
 ---
 
-## Part 3: Arweave — Permanent, Decentralized Storage
-
-### Why Arweave?
+## Part 3: Arweave — Permanent Decentralized Storage
 
 | Storage Type | Risk |
 |-------------|------|
@@ -84,99 +79,110 @@ Fragment_C → encrypted with Guardian 3's public key
 | Standard blockchain | Decentralized, but expensive for large data |
 | **Arweave** | **Decentralized + designed for permanent large-scale storage** |
 
-Arweave's endowment model: pay once, data exists for 200+ years, guaranteed by mathematics. If the Ambrósio Institute closes tomorrow, your BEO and all your BioRecords remain accessible on the Arweave network forever.
+Pay once — data persists for **200+ years**, guaranteed by a mathematical endowment model.
 
-### Transaction Types in BSP
+> If the Ambrósio Institute closes in 30 years, your BEO and BioRecords remain permanently accessible on the Arweave network. Sovereign data outlives its creators.
 
-Every lifecycle event for a BEO generates an Arweave transaction:
+### Arweave Transaction Types in BSP
 
-| Transaction Type | When It Occurs |
-|-----------------|---------------|
-| `BEO_CREATE` | Initial BEO creation |
-| `RECOVERY_UPDATE` | Guardian configuration added or updated |
-| `BIORECORD_SUBMIT` | One or more BioRecords written to BEO |
-| `CONSENT_ISSUE` | New ConsentToken issued by BEO holder |
+| Transaction Type | When |
+|-----------------|------|
+| `BEO_CREATE` | BEO creation |
+| `BIORECORD_SUBMIT` | BioRecords written to BEO |
+| `CONSENT_ISSUE` | New ConsentToken issued |
 | `CONSENT_REVOKE` | ConsentToken revoked — immediate effect |
 | `KEY_ROTATION` | Public key replaced after recovery |
-| `RECOVERY_REQUEST` | Recovery process initiated on new device |
-| `BEO_LOCK` | BEO temporarily locked (suspected compromise) |
+| `RECOVERY_REQUEST` | Recovery process initiated |
+| `BEO_LOCK` | BEO temporarily locked by holder |
 
-**Important**: Arweave never edits — it accumulates. The current state of a BEO is determined by reading all its transactions and applying the BEORegistry's rules.
+**Key property**: Arweave never edits — it accumulates. The current state of a BEO is determined by reading all transactions and applying the BEORegistry's rules.
 
 ---
 
-## Part 4: Smart Contracts — The Rules Nobody Can Change
+## Part 4: Smart Contracts — Immutable Rules
 
-BSP runs five SmartWeave contracts on Arweave. Once deployed, they are immutable:
+Five SmartWeave contracts enforce the protocol on Arweave. Once deployed, they are immutable.
 
-### BEORegistry
-Creates and indexes BEOs. **Open to anyone** — no permission required. Records: public key, `.bsp` domain, recovery configuration.
+| Contract | Purpose | Who Can Call |
+|----------|---------|-------------|
+| **BEORegistry** | Creates and indexes BEOs | Anyone — open |
+| **IEORegistry** | Manages BSP-Certified institutions | Institute (certification); anyone (verify) |
+| **DomainRegistry** | `.bsp` namespace uniqueness guarantor | SDK automatically |
+| **AccessControl** | Consent management — the true gatekeeper | BEO holders (grant/revoke); IEOs (verify) |
+| **Governance** | Multi-sig for critical protocol changes | 2-of-3 Institute keyholders |
 
-### IEORegistry
-Manages BSP-Certified institutions. When a user's app checks if a laboratory is certified, it queries this contract. The badge cannot be faked.
-
-### DomainRegistry
-Guarantees uniqueness of `.bsp` domains. `andre.bsp` can only exist once. Manages transfers for institutional domains (acquisitions/mergers).
-
-### AccessControl
-**The most critical contract.** Every ConsentToken is managed here. Any system attempting to read or write a BEO's data must present a valid, non-revoked token registered in this contract. The blockchain enforces it — no server can bypass it.
+### AccessControl in Code
 
 ```javascript
-// How AccessControl verifies a submission
-function verifySubmission(beo_id, ieo_id, consent_token_id, intent, category) {
+// How AccessControl verifies every operation
+function verifyToken(beo_id, ieo_id, consent_token_id, intent, category) {
     const token = getToken(consent_token_id)
-    
-    if (token.beo_id !== beo_id) throw "TOKEN_BEO_MISMATCH"
-    if (token.ieo_id !== ieo_id) throw "TOKEN_IEO_MISMATCH"
-    if (token.revoked)           throw "TOKEN_REVOKED"
-    if (token.expires_at < now()) throw "TOKEN_EXPIRED"
-    if (!token.scope.intents.includes(intent))   throw "INTENT_NOT_AUTHORIZED"
+
+    if (token.beo_id !== beo_id)     throw "TOKEN_BEO_MISMATCH"
+    if (token.ieo_id !== ieo_id)     throw "TOKEN_IEO_MISMATCH"
+    if (token.revoked)               throw "TOKEN_REVOKED"
+    if (token.expires_at < now())    throw "TOKEN_EXPIRED"
+    if (!token.scope.intents.includes(intent))     throw "INTENT_NOT_AUTHORIZED"
     if (!token.scope.categories.includes(category)) throw "CATEGORY_NOT_AUTHORIZED"
-    
+
     return { authorized: true }
 }
 ```
 
-### Governance
-Multi-signature contract for critical protocol changes. Requires 2-of-3 Institute keyholders. No single person — not even the founder — can modify the core contracts unilaterally.
+---
+
+## Part 5: The BSP Connectivity Model (Like MCP)
+
+The Anthropic Model Context Protocol (MCP) lets anyone build an MCP server without Anthropic's approval. Safety comes from the user actively consenting to which servers the assistant can access.
+
+**BSP follows the exact same logic.**
+
+### How Each Actor Connects
+
+**The User:**
+```
+App generates key pair locally → Creates BEO on Arweave →
+Receives .bsp domain → For every institution, signs a ConsentToken
+```
+
+**The Laboratory (certified or not):**
+```
+pip install bsp-sdk → User must authorize → Submit BioRecords 
+(encrypted with user's public key) → Written to Arweave
+```
+
+**AVA (the intelligence engine):**
+```
+User actively initiates analysis → App decrypts BioRecords locally →
+User sends to AVA with explicit session consent → AVA returns SVA Score →
+Raw data not retained by Institute after processing
+```
+
+> **The key difference**: In BSP, data doesn't move between institutions. Institutions send data *to the user*. The user decides who reads it.
 
 ---
 
-## Part 5: How Each Actor Connects — No Prior Permission
+## Part 6: `bsp-registry-api` — The Relayer & Certification Layer
 
-BSP follows the same model as MCP (Model Context Protocol): anyone can participate, and user consent is the only gatekeeper.
+While the blockchain solves the technical problem of immutable intent, it introduces friction: **Gas fees (paying in $AR to write data)**. To ensure mass adoption, patients cannot be expected to manage crypto wallets.
 
-### The User
-1. App generates key pair locally on first launch.
-2. App calls BEORegistry to register the BEO.
-3. User receives their `.bsp` domain.
-4. For every institution they want to authorize, they sign a transaction in AccessControl.
+The `bsp-registry-api` acts as a **Relayer** covering these costs securely.
 
-### The Laboratory (certified or not)
-1. Installs `bsp-sdk-python` — `pip install bsp-sdk`.
-2. User must sign an authorization before any BioRecord can be written.
-3. Lab submits BioRecords — signed by the lab, encrypted with the user's public key.
-4. BSP-Certified labs gain directory listing and AVA pipeline access. Uncertified labs can still operate, but the user's app shows an "unverified source" warning.
+### The Gasless Relay Flow (Off-Chain Signatures)
 
-### AVA — How It Accesses Encrypted Data
-This is the most important architectural question: if data is encrypted with the user's key, how does AVA analyze it?
+If the Relayer API pays for transactions, how do we prevent malicious actors from flooding the API or forging BEO consents? **Off-Chain Ed25519 Signatures**.
 
-1. **User initiates analysis actively** — AVA never has passive access.
-2. **App decrypts locally** — Using the private key on the user's device, BioRecords are decrypted.
-3. **User sends to AVA with explicit session consent** — The data is transmitted to Institute servers for processing, with explicit per-session consent.
-4. **AVA processes and returns SVA** — Results come back. The original data is not stored by the Institute beyond processing.
+1. **User Intent:** The user's mobile app wants to grant a consent.
+2. **Local Signing:** The app creates a JSON payload describing the intent (e.g., `grantConsent` for Lab X) and signs it deterministically using the user's local **Ed25519 Private Key**.
+3. **Relayer Verification:** The app sends the payload + Base64 signature to the `bsp-registry-api`.
+4. **Zero-Trust Check:** The Relayer API fetches the user's public key from the Arweave `BEORegistry`. It mathematically verifies the signature against the payload.
+   - ❌ **Invalid Signature:** The request is rejected immediately (`401 Unauthorized`). The API spends no gas.
+   - ✅ **Valid Signature:** The API wraps the user's exact intent in an Arweave transaction, pays the gas using the Ambrósio Institute's wallet, and submits it to SmartWeave.
 
----
-
-## Part 6: The Role of `bsp-registry-api`
-
-The blockchain solves the technical problem. The API solves the human problem: verifying that a laboratory is real, legally operating, and technically capable of producing trustworthy biological data.
+This guarantees **Absolute Cryptographic Sovereignty**. Even if the Relayer API itself were compromised, it cannot forge biological consents because it does not possess the user's private key.
 
 | What passes through `bsp-registry-api` | What NEVER passes through |
 |----------------------------------------|--------------------------|
-| ✓ Certification requests | ✗ User biological data |
-| ✓ Institution documentation | ✗ BioRecords of any kind |
-| ✓ Approval status and badges | ✗ Private keys |
-| ✓ BIP submissions and review | ✗ Blockchain transactions |
-
-*The `bsp-registry-api` is the Institute's office — where certification happens. Arweave is the vault — where data lives forever. AccessControl is the gatekeeper — where users decide who enters.*
+| ✓ Certification requests & IEO Badges  | ✗ User biological data (BioRecords) |
+| ✓ Encrypted Shamir guardian fragments  | ✗ The actual Private Key |
+| ✓ Signed intent payloads (Relayer)     | ✗ Unsigned blockchain transactions |

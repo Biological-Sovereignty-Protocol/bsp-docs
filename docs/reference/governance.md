@@ -1,215 +1,171 @@
-# Governance & BIP Process
+---
+title: Governance & BIPs
+---
 
-The BSP is a public protocol — but public goods without governance become irrelevant or corrupted. The BSP governance model balances two imperatives: stability (systems built on BSP shouldn't break on every update) and adaptability (scientific advances must be incorporated).
+# BSP Governance — Protocol Changes and BIPs
 
-> "A protocol that cannot evolve is dead. A protocol that anyone can change is not a protocol."
+> Version 0.2 | Ambrósio Institute
 
 ---
 
-## 1. Governance Philosophy
+## Overview
 
-Three layers evolve at different velocities:
+The BSP specification evolves through a public improvement process — **BSP Improvement Proposals (BIPs)**.
 
-| Layer | Change Frequency | Decision Authority |
-|-------|-----------------|-------------------|
-| **Protocol Core** (BEO, IEO, Exchange) | Annual or less | 2-of-3 multi-sig + 90-day public comment |
-| **Biomarker Taxonomy** (BSP-XX codes) | Quarterly | Scientific Council + Institute ratification |
-| **Implementations** (AVA, SDKs, apps) | Continuous | Each implementor independently |
+Any individual, company, or institution can propose changes to the protocol. The Ambrósio Institute reviews all proposals and coordinates community discussion. Critical protocol changes require multi-signature authorization.
 
 ---
 
-## 2. The Ambrósio Institute as Guardian
+## Governance Principles
 
-The Institute is the **guardian** of the standard, not its owner. This distinction matters: a guardian maintains the protocol's integrity for the ecosystem's benefit, not the Institute's.
-
-### Scientific Council
-
-7 independent scientists who evaluate and approve taxonomy BIPs:
-
-| Attribute | Value |
-|-----------|-------|
-| Composition | 7 members — longevity, cardiology, metabolism, neurology, genomics, immunology, medical laboratory |
-| Independence | No financial relationship with the Institute or any BSP ecosystem company during tenure |
-| Quorum | 5 of 7 members required for a vote |
-| Approval | Simple majority of those present |
-| Meetings | Quarterly: January, April, July, October |
-| Transparency | Meeting minutes published in `bsp-spec` within 14 days; individual votes recorded |
-
-### Three-Key Multi-Sig
-
-Critical protocol operations require 2-of-3 Institute keyholder signatures:
-
-| Keyholder | Role | Storage |
-|-----------|------|---------|
-| **A** — Founder | Day-to-day operations, BIP ratification | Hardware wallet offline |
-| **B** — Scientific Director | Protocol specification and taxonomy changes | Hardware wallet offline, restricted access |
-| **C** — Legal Custodian | Independent fiduciary — safeguard against unilateral abuse | Held by third party with written instructions |
-
-### Authorization Levels
-
-| Level | Operations | Who Executes |
-|-------|-----------|-------------|
-| **Critical** (2-of-3) | Modify core contracts, revoke IEO permanently, change governance structure, protocol emergency | Any 2 keyholders |
-| **Significant** (1 + Council) | Approve BIP + taxonomy update, suspense IEO, publish spec version | Any keyholder after Council vote |
-| **Routine** (1 keyholder) | IEO certification renewal, documentation updates, badge issuance | Any authorized keyholder or automated system |
+1. **Openness** — Anyone can propose a BIP. No institutional affiliation required.
+2. **Transparency** — All proposals, discussions, and decisions are public.
+3. **Conservative change** — Protocol changes have a high bar. Stability is a feature.
+4. **Backward compatibility** — Accepted changes must not break existing implementations, unless the break is clearly necessary and the migration path is defined.
+5. **Institute guardianship** — The Ambrósio Institute is the guardian of the specification, not its owner. The protocol serves the ecosystem.
 
 ---
 
-## 3. BIP Types
+## BIP Categories
 
-| Type | Code | Scope | Comment Period |
-|------|------|-------|---------------|
-| Taxonomia | BIP-T | Add, modify, or remove biomarkers | 30 days |
-| Protocol | BIP-P | Changes to BEO, IEO, BioRecord, Exchange Protocol | 90 days |
-| Governance | BIP-G | Changes to the BIP process or multi-sig structure | 120 days |
-| Informational | BIP-I | Best practices, implementation recommendations | Simplified |
+| Category | Description | Examples |
+|---|---|---|
+| **BSP-BIP-TAXONOMY** | Add or modify biomarker codes | New biomarker, unit correction |
+| **BSP-BIP-SCHEMA** | Changes to BEO, IEO, or BioRecord schema | New field, field type change |
+| **BSP-BIP-EXCHANGE** | Changes to the Exchange Protocol | New intent, error code |
+| **BSP-BIP-GOVERNANCE** | Changes to the governance process itself | BIP template, review timeline |
+| **BSP-BIP-INFRA** | Smart contract upgrades | New contract, parameter change |
 
 ---
 
-## 4. BIP Complete Schema
+## BIP Status Flow
 
-```yaml
-bip_id:        BIP-0042               # Assigned by Institute on submission
-type:          T                       # T | P | G | I
-title:         "Proposed change title"
-status:        DRAFT                   # DRAFT | REVIEW | COUNCIL | ACCEPTED | REJECTED | WITHDRAWN
+```
+DRAFT → REVIEW → ACCEPTED | REJECTED
+                    │
+                  FINAL (after implementation)
+```
 
-authors:
-  - name:        "Full Name"
-    affiliation: "Institution or Independent"
-    contact:     "email@example.com"
-    conflict:    "None"                # Required — any financial interest in the proposal
+| Status | Description |
+|---|---|
+| `DRAFT` | Author is drafting — not yet submitted for review |
+| `REVIEW` | Submitted — open for community discussion (30 days) |
+| `ACCEPTED` | Approved by Institute — scheduled for implementation |
+| `REJECTED` | Not accepted — with explanation |
+| `FINAL` | Implemented and active in a released BSP version |
 
-submitted_at:  2026-01-15
-review_start:  2026-01-22
-council_vote:  2026-04-15
-decided_at:    2026-04-22
+---
 
-abstract:      |                       # Max 200 words
-  ...
+## Submitting a BIP
 
-motivation:    |
-  Why is this change needed now?
+1. Fork this repository
+2. Copy `bip/BIP-0000-template.md` to `bip/BIP-XXXX-your-title.md`
+3. Fill in the template completely
+4. Open a Pull Request
 
-specification: |
-  Technical description of the proposed change.
+The PR opens the 30-day public review period. The Ambrósio Institute will schedule a review call for proposals that reach community consensus.
 
-rationale:     |
-  Why this approach vs. alternatives considered.
+---
 
-backwards_compatibility: |
-  Impact on existing BSP implementations.
+## On-Chain Governance — proposeAction / approveAction
 
-evidence:                              # Required for BIP-T and BIP-P
-  - citation:    "Author et al. (2024). Title. Journal."
-    doi:         "10.xxxx/xxxxxx"
-    year:        2024
-    n_participants: 15000
-    finding:     "What this paper supports in the proposal"
-    quality:     RCT | Meta-analysis | Cohort | Case-control | Expert
+Critical protocol changes are executed through the **Governance smart contract** using a 2-of-3 multisig mechanism. No single keyholder — including the Institute's founder — can execute a change alone.
 
-# For BIP-T: biomarker specification
-biomarker_spec:
-  proposed_code:  BSP-LA-009
-  name:           "Scientific Name"
-  category:       BSP-LA
-  level:          CORE
-  unit:           "umol/L"
-  method:         "ELISA"
-  ref_range:
-    optimal:      "40-60"
-    functional:   "30-70"
-    deficiency:   "<30"
-    toxicity:     ">100"
-  measurability:  "Widely available globally"
-  cost_tier:      LOW | MEDIUM | HIGH | RESEARCH_ONLY
+### Keyholders
 
-council_votes:
-  - member:   "Council Member Name"
-    vote:     APPROVE | REJECT | ABSTAIN
-    comment:  "Justification (required for REJECT)"
+The Governance contract maintains a set of three authorized keyholders. Each keyholder holds an Ed25519 key pair registered on-chain. Keyholder rotation itself requires multisig approval.
 
-final_decision: ACCEPTED | REJECTED
+### Proposal Flow
+
+```
+proposeAction(type, params, justification)
+       │
+       ▼
+  PROPOSAL created (status: PENDING)
+       │
+       ▼
+approveAction(proposal_id, keyholder_signature)   ← 1st approval
+       │
+       ▼
+approveAction(proposal_id, keyholder_signature)   ← 2nd approval (different keyholder)
+       │
+       ▼
+  PROPOSAL executed automatically (status: EXECUTED)
+```
+
+### Proposal Types
+
+| Type | Description | Parameters |
+|---|---|---|
+| `suspendIEO` | Suspend an institutional entity for compliance violation | `ieo_id`, `reason`, `duration` |
+| `reinstateIEO` | Reinstate a previously suspended IEO | `ieo_id` |
+| `changeCertLevel` | Change an IEO's certification level | `ieo_id`, `new_level` |
+| `addIEOType` | Register a new institutional entity type in the protocol | `type_code`, `type_name`, `requirements` |
+| `removeIEOType` | Deprecate an institutional entity type | `type_code`, `migration_path` |
+| `updateParam` | Change a protocol parameter (e.g., consent token max duration) | `param_key`, `new_value` |
+| `addKeyholder` | Add a new keyholder to the Governance contract | `public_key`, `identity` |
+| `removeKeyholder` | Remove a keyholder | `public_key` |
+| `upgradeContract` | Deploy a new version of any BSP smart contract | `contract_id`, `new_source_tx` |
+
+### Proposal Schema
+
+```typescript
+GovernanceProposal {
+  proposal_id:   string       // Unique identifier
+  type:          ProposalType // One of the types above
+  params:        object       // Type-specific parameters
+  justification: string       // Human-readable reason
+  proposed_by:   string       // Keyholder public key
+  proposed_at:   ISO8601
+  approvals:     Approval[]   // List of keyholder approvals
+  status:        'PENDING' | 'EXECUTED' | 'REJECTED' | 'EXPIRED'
+  expires_at:    ISO8601      // Proposals expire after 7 days without quorum
+  executed_at:   ISO8601 | null
+  arweave_tx:    string       // On-chain record
+}
+
+Approval {
+  keyholder:   string         // Public key of approving keyholder
+  signature:   string         // Ed25519 signature over proposal_id + params
+  approved_at: ISO8601
+}
+```
+
+### Security Properties
+
+- Proposals expire after 7 days if quorum is not reached
+- A keyholder cannot approve their own proposal (proposer counts as first approval, but the second must come from a different keyholder)
+- All proposals, approvals, and executions are permanently recorded on Arweave
+- Rejected proposals can be re-submitted with modifications
+
+### SDK Usage
+
+```typescript
+import { GovernanceClient } from '@bsp/sdk'
+
+const gov = new GovernanceClient({ keyholderKey: myPrivateKey })
+
+// Propose suspending an IEO
+const proposal = await gov.proposeAction({
+  type: 'suspendIEO',
+  params: { ieo_id: 'bad-lab.bsp', reason: 'Data falsification', duration: '90d' },
+  justification: 'Audit revealed systematic data falsification in submitted BioRecords'
+})
+
+// Another keyholder approves
+const gov2 = new GovernanceClient({ keyholderKey: otherKeyholderKey })
+await gov2.approveAction(proposal.proposal_id)
+// → Proposal executed automatically after 2nd approval
 ```
 
 ---
 
-## 5. BIP Process: From Idea to Taxonomy
+## BIP Index
 
-```
-Day 1: Submission
-  → Author opens a Pull Request in bsp-spec/bip/
-  → Institute assigns BIP number, sets status: DRAFT
-
-Week 1–2: Technical Review
-  → Institute team reviews schema, references, technical coherence
-  → Feedback via GitHub comments
-  → Multiple rounds normal → status: REVIEW
-
-Days 15–45 (BIP-T): Public Comment Period
-  → BIP open for community input on GitHub
-  → Anyone can comment: labs, physicians, researchers, developers
-  → Author must respond to all substantial comments
-  → Institute publishes comment summary → status: COUNCIL
-
-Council Meeting (Quarterly): Vote
-  → Full BIP + comment summary + Institute technical opinion presented
-  → Each member votes APPROVE / REJECT / ABSTAIN with mandatory justification
-  → Quorum: 5 of 7 · Approval: simple majority of those present
-  → Votes and justifications published in minutes
-
-Week 1–2 post-vote: Ratification & Implementation
-  → If ACCEPTED: Keyholder B ratifies on-chain, taxonomy updated in bsp-spec
-  → SDKs updated in the next release with backwards compatibility
-  → If REJECTED: Author receives detailed feedback, may resubmit — no limit on attempts
-```
+| BIP | Title | Status |
+|---|---|---|
+| BIP-0000 | BIP Template | FINAL |
 
 ---
 
-## 6. BIP Examples: Accepted and Rejected
-
-### Example of an Accepted BIP — Adding GDF-11 (BSP-LA-005)
-
-**Why it was accepted:**
-- 2+ high-quality peer-reviewed references (Katsimpardi et al., 2014 *Science*; meta-analysis n=15,000+)
-- Established analytical method (ELISA)
-- Growing clinical availability
-- Reference ranges based on population data
-
-### Examples of Rejected BIPs
-
-| Proposal | Reason for Rejection |
-|----------|---------------------|
-| Add "subjective energy level" as a biomarker | Not objectively measurable. BSP requires numeric values with standardized units. |
-| Add 40 nutritional biomarkers in a single BIP | Bulk proposal with no individual evidence per marker. Resubmit as separate BIPs. |
-| Add `provider_fee` field to Exchange Protocol | Attempt to insert monetization into the protocol core. BSP cannot be used to extract value from user-institution transactions. |
-
----
-
-## 7. Emergency Procedures
-
-| Type | Severity | Response |
-|------|----------|---------|
-| Critical security vulnerability in smart contracts | CRITICAL | 24–48h response. Immediate 2-of-3 multi-sig action. |
-| Unexpected production behavior (bug) | HIGH | 7-day resolution. Immediate public communication. |
-| Specification inconsistency (breaking ambiguity) | MEDIUM | Resolution at next Council meeting, advance notification. |
-
----
-
-## 8. Protocol Capture Protection
-
-The three structural protections against the Institute acting against the ecosystem's interests:
-
-1. **Independent Keyholder C**: A third-party fiduciary holds the third key. Any unilateral abuse by Keyholders A and B can be blocked.
-2. **Public, Auditable BIPs**: Every proposal, every vote, every decision is public and recorded on-chain. Anyone can verify the Institute is acting in the ecosystem's interest.
-3. **Fork Protection Commitment**: The Institute publicly commits to never legally challenge BSP forks. If the scientific community disagrees with Institute decisions, they may fork — without legal barriers.
-
----
-
-## How to Submit a BIP
-
-1. Fork `biological-sovereignty-protocol/bsp-spec`
-2. Copy `bip/TEMPLATE.md` to `bip/BIP-DRAFT-your-title.md`
-3. Fill in the template — evidence citations are mandatory for BIP-T and BIP-P
-4. Submit a Pull Request to the main branch
-5. The Institute assigns a BIP number within 3 business days
+*Ambrósio Institute · ambrosioinstitute.org · biologicalsovereigntyprotocol.com*

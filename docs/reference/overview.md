@@ -1,137 +1,146 @@
-# Protocol Overview
+---
+title: Specification Overview
+---
 
-The Biological Sovereignty Protocol (BSP) is built on three distinct but interconnected layers. Understanding these layers is the foundation for understanding any integration with the protocol.
+<div class="page-hero-image">
+  <img src="/images/spec-overview.jpg" alt="BSP Specification Overview — protocol architecture" style="width:100%;border-radius:16px;margin-bottom:2rem;box-shadow:0 8px 32px rgba(0,118,255,0.12);" />
+</div>
+
+
+# BSP Architecture — The Three Layers
+
+> Version 0.2 | Ambrósio Institute
 
 ---
 
-## The Three Layers
+## Overview
+
+The Biological Sovereignty Protocol is organized into three distinct layers. Each layer has a clearly defined responsibility and is designed to be independent — changes to one layer do not break implementations of another.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  LAYER 3 — EXCHANGE                                         │
-│  How data moves: Exchange Protocol, Intents, ConsentTokens  │
-├─────────────────────────────────────────────────────────────┤
-│  LAYER 2 — DATA                                             │
-│  What the data is: BioRecord, Biomarker Taxonomy            │
-├─────────────────────────────────────────────────────────────┤
-│  LAYER 1 — IDENTITY                                         │
-│  Who the actors are: BEO, IEO, .bsp Domains                 │
-└─────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                  INTELLIGENCE LAYER                      │
+│         AVA · SVA · Third-party algorithms              │
+│    (above the protocol — not defined by BSP)            │
+└─────────────────────────────────────────────────────────┘
+                           │
+┌─────────────────────────────────────────────────────────┐
+│              LAYER 3 — BSP-Exchange                      │
+│           Communication Protocol                        │
+│   How systems request and respond with biological data  │
+└─────────────────────────────────────────────────────────┘
+                           │
+┌─────────────────────────────────────────────────────────┐
+│              LAYER 2 — BSP-Data                          │
+│           Biological Data Schema                        │
+│   Structure of all biological measurements (BioRecord)  │
+└─────────────────────────────────────────────────────────┘
+                           │
+┌─────────────────────────────────────────────────────────┐
+│              LAYER 1 — BSP-Identity                      │
+│           Biological Identity                           │
+│   The sovereign identity object — BEO                   │
+│   Stored on Arweave — permanent, decentralized          │
+└─────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Layer 1: Identity
+## Layer 1 — BSP-Identity
 
-Every participant in the BSP ecosystem has a cryptographic identity.
+**What it defines:** Who holds the data.
 
-### BEO — Biological Entity Object
-The sovereign biological identity of a living human being. A BEO is:
+Every individual and every institution in the BSP ecosystem has a permanent, decentralized identity:
+- **BEO** — Biological Entity Object (individual)
+- **IEO** — Institutional Entity Object (laboratory, hospital, platform, etc.)
 
-- **Created by the individual** — no permission required from any authority
-- **Controlled by a private key** — stored locally on the user's device, never transmitted
-- **Permanent** — anchored on the Arweave blockchain, cannot be deleted
-- **Identified by a `.bsp` domain** — e.g., `andre.bsp`
+The BEO is the center of gravity of the entire protocol. Every BioRecord, every consent, every interaction is anchored to a BEO.
 
-All BioRecords for a person are attached to their BEO. All ConsentTokens authorizing access are issued from it.
+BEOs and IEOs are stored on the **Arweave** blockchain — persistent and decentralized. No company, government, or the Ambrósio Institute itself can alter a registered identity. The individual retains the right to render their data permanently inaccessible through cryptographic erasure.
 
-### IEO — Institutional Entity Object
-The identity of any organization that interacts with biological data: laboratories, hospitals, wearable manufacturers, physicians, insurers, research institutions, AI platforms.
+Key identity operations include:
 
-- **Created by the institution** — open, no approval required
-- **Identified by a `.bsp` domain** — e.g., `fleury.bsp`
-- **Can be BSP-Certified** — voluntary quality mark that enables AVA data pipeline access
+- **Lock/Unlock** — Temporarily freeze a BEO to prevent any data exchange (useful during key compromise investigations or travel)
+- **Domain Transfer** — Transfer an institutional `.bsp` domain to a new owner entity, recorded on-chain with full audit trail
 
-### BEO vs IEO
-
-| Property | BEO | IEO |
-|----------|-----|-----|
-| Represents | A living human | An organization or system |
-| Created by | The individual | Any institution |
-| Transferable | Never | Yes (acquisitions) |
-| Can read BEOs | Own data only | Only with ConsentToken |
-| Can write BioRecords | No | Yes, with ConsentToken |
-| Domain format | `firstname.bsp` | `institutionname.bsp` |
+→ See [`beo.md`](beo.md) and [`ieo.md`](ieo.md) for complete specifications.
 
 ---
 
-## Layer 2: Data
+## Layer 2 — BSP-Data
 
-### BioRecord
-The atomic unit of biological data in the BSP ecosystem. Every measurement — blood test result, wearable reading, clinical assessment, genomic marker — is represented as a standardized BioRecord.
+**What it defines:** What the data contains.
 
-Key properties:
-- **Immutable**: Once written, a BioRecord cannot be modified. Corrections are submitted as new, superseding records.
-- **Encrypted**: Stored encrypted with the BEO holder's public key. Only the holder can decrypt.
-- **Attributed**: Cryptographically signed by the submitting IEO, providing full provenance.
-- **Standardized**: Uses BSP biomarker codes (e.g., `BSP-LA-004` for NAD+).
+Every biological measurement — a blood test result, a genomic marker, a wearable reading, a clinical assessment — is represented as a **BioRecord**.
 
-### Biomarker Taxonomy
-BSP defines the most comprehensive open biomarker taxonomy ever codified — 210+ biomarkers across 25 categories and 4 levels:
+BioRecords are the atomic units of biological data in the BSP ecosystem. They are:
+- **Immutable** — once written, they cannot be altered (but can be made permanently inaccessible through cryptographic erasure)
+- **Anchored** — every BioRecord belongs to a specific BEO
+- **Classified** — every BioRecord carries a BSP taxonomy code
+- **Signed** — every BioRecord carries a cryptographic signature from the submitting entity
 
-| Level | Coverage | Who can submit |
-|-------|----------|---------------|
-| L1 — Core | Advanced longevity markers | BSP-2 (Advanced) certified |
-| L2 — Standard | Routine clinical labs | BSP-1 (Basic) certified |
-| L3 — Extended | Genomics, microbiome, specialized | BSP-3 (Full) certified |
-| L4 — Device | Continuous wearable biometrics | BSP-4 (Device) certified |
+→ See [`biorecord.md`](biorecord.md) for the complete BioRecord specification.
+→ See [Biomarker Taxonomy](taxonomy/level-1-core) for the full biomarker taxonomy.
 
 ---
 
-## Layer 3: Exchange
+## Layer 3 — BSP-Exchange
 
-### Exchange Protocol
-The communication layer that defines how data moves between systems. Every interaction is a `BSPRequest` → `BSPResponse` cycle.
+**What it defines:** How data moves.
 
-Requests are authenticated twice:
-1. **ConsentToken**: Proof that the BEO holder authorized this IEO for this action
-2. **IEO Signature**: The institution's cryptographic signature on the request
+The BSP Exchange Protocol defines the format of requests and responses between systems:
 
-### BSP Intents
-The Exchange Protocol uses typed intents to define what action is being requested:
+- How any system submits data to a BEO
+- How a platform requests read access
+- How an AI engine queries a biological history
+- How consent tokens are structured and verified
+- How BEO holders manage their **intents** — adding or removing authorized operation types (`addIntent`/`removeIntent`) on active consent tokens without revoking and re-issuing them
 
-| Intent | Description |
-|--------|-------------|
-| `SUBMIT_RECORD` | Write a BioRecord to a BEO |
-| `READ_RECORDS` | Read BioRecords from a BEO |
-| `ANALYZE_VITALITY` | Request AVA analysis |
-| `REQUEST_SCORE` | Request SVA score |
-| `EXPORT_DATA` | Export all data (always available to BEO holder) |
-| `SYNC_PROTOCOL` | Version negotiation |
+All exchange operations are subject to the **AccessControl** smart contract — the BEO holder's consent is required for every data transaction.
 
-### ConsentToken
-A cryptographic authorization issued by the BEO holder to a specific IEO, for specific intents, specific data categories, and a defined time period. Stored as a SmartWeave contract on Arweave — mathematically immune to bypass.
-
-Revocation is **immediate and on-chain**. No IEO can retain access after revocation.
+→ See [`exchange.md`](exchange.md) for the complete Exchange Protocol specification.
 
 ---
 
-## The Blockchain Layer: Arweave
+## Decentralized Infrastructure
 
-All BSP data and smart contracts live on **Arweave** — a decentralized storage blockchain designed for permanent data retention (200+ years, guaranteed by a mathematical endowment model).
+BSP records are stored on **Arweave** — a permanent, decentralized storage protocol designed to preserve data for 200+ years.
 
-Key properties for BSP:
-- **No central server** — data doesn't depend on any company's survival
-- **Immutable history** — every transaction is permanent and auditable
-- **One-time payment** — pay once to store, data exists forever
-- **Open access** — anyone can read the public data (BEO registry, IEO registry)
+Smart contracts managing BEO identities, domain registrations, and access permissions are deployed via SmartWeave on Arweave. This ensures:
+- No single point of failure
+- No company (including Ambrósio Institute) can alter the rules unilaterally
+- Data written to BSP infrastructure persists with integrity, while the individual retains the right to cryptographic erasure
 
-The five BSP smart contracts on Arweave:
+### Sovereign Cryptographic Erasure
+
+BSP implements **Sovereign Cryptographic Erasure** as a core principle. All BioRecords are encrypted with the holder's Ed25519 public key. Destroying the private key renders the data permanently inaccessible — a stronger guarantee than traditional deletion. This satisfies GDPR Article 17 and LGPD Article 18 requirements for the right to erasure.
+
+The five smart contracts in the BSP infrastructure:
 
 | Contract | Purpose |
-|----------|---------|
-| `BEORegistry` | Creates and indexes BEOs — open to anyone |
-| `IEORegistry` | Manages certified institutions |
-| `DomainRegistry` | Guarantees uniqueness of `.bsp` domains |
-| `AccessControl` | The gatekeeper — manages all consent tokens |
-| `Governance` | Multi-sig for critical protocol changes |
+|---|---|
+| **BEORegistry** | Creates and manages biological identities — open to anyone |
+| **IEORegistry** | Manages institutional identities and certification status |
+| **DomainRegistry** | Controls the `.bsp` namespace — guarantees uniqueness |
+| **AccessControl** | Manages consent tokens — the true gatekeeper of the protocol |
+| **Governance** | Multi-signature (2-of-3) authorization for critical protocol changes via `proposeAction`/`approveAction` |
+
+→ See [`bsp-domain.md`](bsp-domain.md) for the `.bsp` domain system.
+→ See [`governance.md`](governance.md) for the governance model.
 
 ---
 
-## Next Steps
+## The Intelligence Layer (Above BSP)
 
-- [BEO Specification →](./beo.md)
-- [IEO Specification →](./ieo.md)
-- [ConsentToken & Access Control →](./consent-token.md)
-- [Exchange Protocol →](./exchange-protocol.md)
-- [Developer Quickstart →](../quickstart/README.md)
+The intelligence layer is **not part of the BSP specification**.
+
+BSP defines how data is structured and transported — not what conclusions to draw from it. Intelligence layers such as:
+- Ambrósio Vitality Algorithm (AVA)
+- Ambrósio Vitality Score (SVA)
+- Any third-party analytics engine
+
+...operate above the protocol, consuming standardized BSP data to produce insights. Any system in the world can implement the BSP. Only Ambrósio holds the AVA.
+
+---
+
+*Ambrósio Institute · ambrosioinstitute.org · biologicalsovereigntyprotocol.com*

@@ -17,7 +17,19 @@ No blockchain wallet, no prior crypto experience required.
 
 ---
 
-## Install the SDK
+## Option A: Use the CLI (fastest)
+
+```bash
+npx @bsp/cli create yourname.bsp       # Create BEO identity
+npx @bsp/cli config set private-key <your-key>
+npx @bsp/cli resolve yourname.bsp      # Verify on-chain
+```
+
+The CLI handles key generation, signing, and API calls. Skip to "Grant Consent" if using the CLI.
+
+---
+
+## Option B: Install the SDK
 
 ```bash
 npm install @bsp/sdk

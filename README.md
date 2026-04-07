@@ -13,6 +13,7 @@
 | Understand what BSP is | [Whitepaper](docs/whitepaper.md) |
 | See the 3-layer architecture | [Protocol Overview](docs/reference/overview.md) |
 | Integrate as a laboratory or clinic | [Developer Quickstart](docs/quickstart/README.md) |
+| Use the CLI (fastest way) | `npx @bsp/cli create yourname.bsp` |
 | Onboard as a user | [User Onboarding](docs/guides/user-onboarding.md) |
 | Get BSP Certified | [Certification Guide](docs/guides/certification.md) |
 | Understand the full ecosystem flow | [Ecosystem Flow](docs/guides/ecosystem-flow.md) |
@@ -68,6 +69,7 @@ Open an issue or pull request in this repository. All documentation is CC BY 4.0
 | [bsp-spec](https://github.com/Biological-Sovereignty-Protocol/bsp-spec) | Public | Protocol specification |
 | [bsp-sdk-typescript](https://github.com/Biological-Sovereignty-Protocol/bsp-sdk-typescript) | Public | TypeScript SDK (`@bsp/sdk`) |
 | [bsp-sdk-python](https://github.com/Biological-Sovereignty-Protocol/bsp-sdk-python) | Public | Python SDK (`bsp-sdk`) |
+| [bsp-cli](https://github.com/Biological-Sovereignty-Protocol/bsp-cli) | Public | CLI (`npx @bsp/cli`) |
 | [bsp-mcp](https://github.com/Biological-Sovereignty-Protocol/bsp-mcp) | Public | MCP server for AI connectivity |
 | [bsp-id-web](https://github.com/Biological-Sovereignty-Protocol/bsp-id-web) | Public | BSP identity web application |
 | [bsp-docs-repo](https://github.com/Biological-Sovereignty-Protocol/bsp-docs-repo) | Public | This repository |

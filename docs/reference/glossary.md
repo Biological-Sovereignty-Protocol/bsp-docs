@@ -114,9 +114,9 @@ Mechanism for recovering a BEO private key without a central server. The holder 
 | `bsp-spec` | Public | Complete protocol specification |
 | `bsp-sdk-typescript` | Public | Official TypeScript SDK (`@bsp/sdk`) |
 | `bsp-sdk-python` | Public | Official Python SDK (`bsp-sdk`) |
-| `bsp-mcp` | Public | Official MCP server for AI connectivity |
+| `bsp-cli` | Public | Official CLI (`npx @bsp/cli`) — 22 commands |
+| `bsp-mcp` | Public | Official MCP server for AI connectivity (9 tools) |
 | `bsp-id-web` | Public | BSP identity web application |
 | `bsp-docs-repo` | Public | This documentation site |
-| `bsp-contracts` | Private | Smart contracts on Arweave |
-| `bsp-registry-api` | Private | Certification portal API |
-| `bsp-id-web` | Private | Identity web app (Ambrosio Institute fork) |
+| `bsp-contracts` | Private | Smart contracts — source, tests, build, deploy (unified) |
+| `bsp-registry-api` | Private | Gasless relayer API — 26 REST routes, pays Arweave gas |

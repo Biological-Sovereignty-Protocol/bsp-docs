@@ -16,7 +16,7 @@ BSP's GitHub infrastructure is split into two organizations. This separation ref
 | | Public | Private |
 |--|--------|---------|
 | **Organization** | `biological-sovereignty-protocol` | `ambrosio-institute` |
-| **Repositories** | 5 — all public | 4 — all private |
+| **Repositories** | 9 — all public | 4 — all private |
 | **License** | CC BY 4.0 | Proprietary IP |
 | **Access** | Anyone — clone, fork, contribute | Institute only |
 | **Purpose** | The open standard | Operations + proprietary intelligence |
@@ -71,6 +71,21 @@ npm install @bsp/mcp
 - `bsp_resolve_biomarker` — Look up BSP biomarker codes
 - `bsp_list_categories` — List taxonomy categories
 - `bsp_check_consent` — Check current consent status
+- `bsp_lock_beo` — Emergency lock a BEO
+- `bsp_unlock_beo` — Unlock a locked BEO
+- `bsp_destroy_beo` — Permanent erasure (LGPD/GDPR)
+- `bsp_revoke_all_tokens` — Emergency revoke all consent
+
+### `bsp-cli` — Command-Line Interface
+Official CLI for managing BEOs, IEOs, consent, and health data from the terminal.
+
+```bash
+npx @bsp/cli create andre.bsp
+npx @bsp/cli consent grant <beoId> <ieoId> --intents SUBMIT_RECORD --days 365
+npx @bsp/cli export <beoId> --token <tok> --format FHIR_R4
+```
+
+22 commands covering the full protocol lifecycle.
 
 ### `bsp-docs-repo` — Public Documentation
 This website. Powers `biologicalsovereigntyprotocol.com`. The human entry point for anyone wanting to understand or integrate BSP.
@@ -81,7 +96,9 @@ This website. Powers `biologicalsovereigntyprotocol.com`. The human entry point 
 
 These repositories contain the Institute's operational infrastructure and proprietary intelligence.
 
-### `bsp-contracts` — Smart Contracts on Arweave
+### `bsp-contracts` — Smart Contracts on Arweave (unified repo)
+
+Source code, tests (49 vitest), build, and deploy scripts — all in one place. Previously `bsp-registry` was a separate deploy repo; it has been merged here and archived.
 
 | Contract | Purpose | Open to? |
 |----------|---------|---------|
@@ -89,19 +106,20 @@ These repositories contain the Institute's operational infrastructure and propri
 | `IEORegistry` | Manage certified institutions | Institute (write); Anyone (verify) |
 | `DomainRegistry` | `.bsp` namespace uniqueness | Automatic via SDK |
 | `AccessControl` | Consent management — the true gatekeeper | BEO holders (grant/revoke); IEOs (verify) |
-| `Governance` | Multi-sig for critical protocol changes | 2-of-3 Institute keyholders |
 
 Contracts are **immutable after deployment**. Their specification is public in `bsp-spec`.
 
-### `bsp-registry-api` — Certification Portal
-The human workflow layer for voluntary BSP Certification.
+### `bsp-registry-api` — Gasless Relayer API
+The API server that relays user-signed transactions to Arweave and pays the gas. 26 REST routes covering BEO, IEO, consent, exchange, and query operations.
 
 | What passes through | What NEVER passes through |
 |--------------------|--------------------------|
-| ✓ Certification requests | ✗ User biological data |
-| ✓ Institution documentation | ✗ BioRecords |
-| ✓ Approval status and badges | ✗ Private keys |
-| ✓ BIP submissions | ✗ Blockchain transactions |
+| ✓ Ed25519-signed payloads | ✗ Private keys |
+| ✓ BEO/IEO creation requests | ✗ Raw wallet credentials |
+| ✓ ConsentToken grant/revoke | ✗ Unverified operations |
+| ✓ BioRecord submissions (encrypted) | ✗ Unsigned requests |
+
+The relayer verifies every Ed25519 signature before relaying to Arweave. It cannot forge user actions.
 
 ### `ava-core` — AVA Algorithm (Proprietary)
 The Ambrósio Vitality Algorithm. Processes BioRecords **only** when a user actively initiates an analysis — never has passive access. The Institute's central intellectual asset.
@@ -116,7 +134,7 @@ Converts AVA's analysis into the multi-dimensional Ambrósio Vitality Score (SVA
 ```
 1. bsp-spec           ← Foundation: the standard everything implements
 2. bsp-contracts      ← On-chain infrastructure (immutable after deployment)
-3. bsp-registry-api   ← Certification portal (human workflow)
+3. bsp-registry-api   ← Gasless relayer API (26 routes)
 4. bsp-sdk-typescript ← First SDK (widest integration coverage)
 5. bsp-mcp            ← AI connectivity (built on the TypeScript SDK)
 6. bsp-sdk-python     ← Lab SDK (follows the same spec)

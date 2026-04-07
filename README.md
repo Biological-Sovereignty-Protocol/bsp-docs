@@ -43,6 +43,16 @@
 | [GitHub Architecture](docs/guides/github-architecture.md) | The two GitHub organizations, repos, and build sequence |
 | [Certification Guide](docs/guides/certification.md) | Voluntary certification — levels, process, requirements |
 | [User Onboarding](docs/guides/user-onboarding.md) | How users create their BEO and first BioRecord |
+| [CLI Reference](docs/guides/cli.md) | Complete reference for the 22 CLI commands |
+| [MCP Server](docs/guides/mcp.md) | Connect AI agents to BSP with consent enforcement |
+
+---
+
+## API Reference
+
+| Document | Description |
+|----------|-------------|
+| [REST API Reference](docs/reference/api-reference.md) | All 26 routes — BEO, IEO, consent, exchange, query |
 
 ---
 

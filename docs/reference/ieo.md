@@ -192,4 +192,54 @@ Each IEO type is authorized for specific exchange intents:
 
 ---
 
+## Sovereignty Operations
+
+### Lock / Unlock IEO
+
+The IEO holder can lock their identity in an emergency (e.g., compromised credentials). While locked, no operations are permitted.
+
+```typescript
+// Lock
+{ function: 'lockIEO', ieoId, nonce, timestamp }
+
+// Unlock
+{ function: 'unlockIEO', ieoId, nonce, timestamp }
+```
+
+### Key Rotation
+
+The IEO holder can rotate their Ed25519 key. Requires signature with the current key.
+
+```typescript
+{ function: 'rotateKey', ieoId, newPublicKey, nonce, timestamp }
+```
+
+### Destroy IEO — Sovereign Cryptographic Erasure
+
+The institution destroys its own IEO. Irreversible.
+
+1. Public key nullified (cryptographic erasure)
+2. Recovery config wiped
+3. Certification cleared
+4. All ConsentTokens received by this IEO are revoked via AccessControl
+5. Domain released from DomainRegistry
+
+```typescript
+{ function: 'destroyIEO', ieoId, nonce, timestamp }
+```
+
+### Governance — Multisig 2-of-3
+
+Critical operations (suspend, revoke, change cert level) require approval from 2 of 3 Institute keyholders.
+
+```typescript
+// Keyholder 1 proposes
+{ function: 'proposeAction', action: 'suspendIEO', ieoId, params: { reason: '...' } }
+
+// Keyholder 2 approves → auto-executed
+{ function: 'approveAction', proposalId }
+```
+
+---
+
 *Ambrósio Institute · ambrosioinstitute.org · biologicalsovereigntyprotocol.com*

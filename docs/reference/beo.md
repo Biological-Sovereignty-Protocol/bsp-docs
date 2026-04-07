@@ -229,6 +229,57 @@ No single guardian can restore access alone. No central server is involved. The 
 
 ---
 
+## Destroy BEO — Sovereign Cryptographic Erasure
+
+LGPD Art. 18 / GDPR Art. 17 — Right to erasure.
+
+The BEO holder can permanently destroy their biological identity. This is **irreversible**.
+
+### What happens on-chain
+
+1. **Public key nullified** — cryptographic erasure. No one can sign as this BEO again.
+2. **All ConsentTokens revoked** — cross-contract call to AccessControl.
+3. **Domain released** — `.bsp` domain freed in DomainRegistry.
+4. **Recovery config wiped** — guardians can no longer recover a destroyed BEO.
+5. **Status set to `DESTROYED`** — permanent, no undo.
+
+### Signed payload
+
+```typescript
+{
+  function: 'destroyBEO',
+  beoId: string,
+  nonce: string,      // 16+ char random
+  timestamp: string   // ISO8601, max 5 min old
+}
+```
+
+Requires Ed25519 signature with the BEO's current private key.
+
+### Important
+
+- Data already on Arweave is immutable — but with the key destroyed and all tokens revoked, no institution can decrypt or access any biological data linked to this BEO.
+- After destruction, the BEO holder should securely delete their local private key.
+- This operation cannot be reversed by guardians, the Institute, or anyone else.
+
+---
+
+## Revoke by Intent
+
+Revokes all active ConsentTokens for a specific intent (e.g., revoke all `SUBMIT_RECORD` permissions while keeping `READ_RECORDS` active).
+
+```typescript
+{
+  function: 'revokeByIntent',
+  beoId: string,
+  intent: string,     // e.g. 'SUBMIT_RECORD'
+  nonce: string,
+  timestamp: string
+}
+```
+
+---
+
 ## Example BEO (JSON)
 
 ```json

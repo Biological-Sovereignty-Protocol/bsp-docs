@@ -39,22 +39,22 @@ The most critical BSP contract. Manages all consent grants between BEOs and IEOs
 *See: [Security & Blockchain](../guides/security-blockchain.md)*
 
 ### Arweave
-Decentralized storage blockchain where all BSP data and smart contracts live. Pay once — data persists for 200+ years, guaranteed by a mathematical endowment model. Chosen because: eliminates central server dependency, even if the Institute closes, BEOs and BioRecords remain accessible. BSP smart contracts run via SmartWeave on Arweave.
+Decentralized storage blockchain where all BSP data and AO processes live. Pay once — data persists for 200+ years, guaranteed by a mathematical endowment model. Chosen because: eliminates central server dependency, even if the Institute closes, BEOs and BioRecords remain accessible. BSP processes run as AO processes on Arweave.
+
+### AO
+Arweave's hyper-parallel compute platform. BSP processes run as AO processes on Arweave, using Lua for on-chain logic. Each process is permanent and communicates via messages. SDK: `@permaweb/aoconnect`.
 
 ### BEORegistry
-SmartWeave contract on Arweave responsible for creating and indexing BEOs. **Open to anyone** — no approval from the Ambrósio Institute required. Records: public address, public key hash, and basic BEO metadata.
+AO process on Arweave responsible for creating and indexing BEOs. **Open to anyone** — no approval from the Ambrósio Institute required. Records: public address, public key hash, and basic BEO metadata.
 
 ### DomainRegistry
-SmartWeave contract controlling the `.bsp` namespace. Guarantees uniqueness: `andre.bsp` can only exist once. Manages registrations, transfers, and revocations following protocol rules. Automatically consulted by the bsp-sdk when creating BEOs and IEOs.
+AO process controlling the `.bsp` namespace. Guarantees uniqueness: `andre.bsp` can only exist once. Manages registrations, transfers, and revocations following protocol rules. Automatically consulted by the bsp-sdk when creating BEOs and IEOs.
 
-### Governance (contract)
-SmartWeave contract controlling modifications to other critical BSP contracts. Implements the multi-signature model: critical operations (suspending an IEO, modifying protocol parameters) require signatures from at least 2 of 3 Institute authorized keyholders. No individual — including the founder — can unilaterally alter protocol rules.
+### Governance (process)
+AO process controlling modifications to other critical BSP processes. Implements the multi-signature model: critical operations (suspending an IEO, modifying protocol parameters) require signatures from at least 2 of 3 Institute authorized keyholders. No individual — including the founder — can unilaterally alter protocol rules.
 
 ### IEORegistry
-SmartWeave contract on Arweave managing BSP-Certified IEOs. Records which institutions obtained the certification seal, at which level, and with which authorized categories. Consulted by Ambrosio OS and other apps to verify institution credentials.
-
-### SmartWeave
-Smart contract framework running on Arweave. Enables programmable logic on Arweave's permanent storage blockchain. All BSP contracts (BEORegistry, IEORegistry, DomainRegistry, AccessControl, Governance) are deployed via SmartWeave.
+AO process on Arweave managing BSP-Certified IEOs. Records which institutions obtained the certification seal, at which level, and with which authorized categories. Consulted by Ambrosio OS and other apps to verify institution credentials.
 
 ---
 

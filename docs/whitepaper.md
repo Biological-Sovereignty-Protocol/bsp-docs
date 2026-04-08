@@ -95,7 +95,7 @@ Any system can attempt to submit a **BioRecord** to a **BEO**. There is no certi
 
 **BSP** records are stored on Arweave — a permanent, decentralized storage protocol designed to preserve data for 200+ years through a mathematically sustainable endowment model. Once a **BioRecord** is written, it persists on the network regardless of what happens to any company in the ecosystem — including the Ambrósio Institute. The individual can, at any time, render their records permanently inaccessible through cryptographic erasure (Section 4.4).
 
-Smart contracts managing **BEO** identities, .bsp domain registrations, and access permissions are deployed via SmartWeave on Arweave — ensuring that the rules of the protocol cannot be changed by any single actor. All critical parameter changes require multi-signature authorization from Institute keyholders.
+AO processes managing **BEO** identities, .bsp domain registrations, and access permissions run on Arweave's hyper-parallel compute platform — ensuring that the rules of the protocol cannot be changed by any single actor. All critical parameter changes require multi-signature authorization from Institute keyholders.
 
 ## 3. The Biomarker Taxonomy
 
@@ -277,7 +277,7 @@ The **BSP** taxonomy and protocol specification evolve through an open proposal 
 
 ### 7.3 — Smart Contract Governance
 
-Core **BSP** contracts — those governing **BEO** identity registration, .bsp domain allocation, and access control rules — are deployed on Arweave via SmartWeave. All critical parameters require a minimum of two of three authorized Institute keyholders to sign any modification. No single person — including the Institute's founder — can unilaterally change the rules of the protocol.
+Core **BSP** processes — those governing **BEO** identity registration, .bsp domain allocation, and access control rules — run as AO processes on Arweave. All critical parameters require a minimum of two of three authorized Institute keyholders to sign any modification. No single person — including the Institute's founder — can unilaterally change the rules of the protocol.
 
 ## 8. The Ecosystem
 

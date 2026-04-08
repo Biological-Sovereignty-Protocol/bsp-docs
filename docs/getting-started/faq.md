@@ -37,7 +37,7 @@ Only you, and the institutions you explicitly authorize. All BioRecords are encr
 ## Security & Consent
 
 ### How is my data secured?
-Control of your BEO is determined by a **private key (Ed25519)** stored securely in your device's hardware enclave (e.g., Apple Secure Enclave). Access control rules (ConsentTokens) execute as SmartWeave contracts on the blockchain, making them mathematically immune to unauthorized access.
+Control of your BEO is determined by a **private key (Ed25519)** stored securely in your device's hardware enclave (e.g., Apple Secure Enclave). Access control rules (ConsentTokens) execute as AO processes on Arweave, making them mathematically immune to unauthorized access.
 
 ### What happens if I lose my phone or private key?
 If you lose your device, you have two ways to recover your BEO:

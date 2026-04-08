@@ -1,6 +1,6 @@
 ---
 title: "API Reference"
-description: "Complete REST API reference for the BSP Registry API — 26 routes for BEO, IEO, consent, exchange, and query operations."
+description: "Complete REST API reference for the BSP Registry API — 36 routes for BEO, IEO, consent, exchange, and query operations."
 ---
 
 # Registry API Reference

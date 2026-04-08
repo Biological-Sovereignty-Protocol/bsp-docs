@@ -119,4 +119,4 @@ Mechanism for recovering a BEO private key without a central server. The holder 
 | `bsp-id-web` | Public | BSP identity web application |
 | `bsp-docs-repo` | Public | This documentation site |
 | `bsp-contracts` | Private | Smart contracts — source, tests, build, deploy (unified) |
-| `bsp-registry-api` | Private | Gasless relayer API — 26 REST routes, pays Arweave gas |
+| `bsp-registry-api` | Private | Gasless relayer API — 36 REST routes, pays Arweave gas |

@@ -86,7 +86,7 @@ As a BEO holder, you have full sovereignty over your biological data:
 
 This website may use the following third-party services:
 
-- **Vercel** — hosting and analytics
+- **Coolify (self-hosted)** — hosting
 - **GitHub** — source code and issue tracking
 
 Each service has its own privacy policy.

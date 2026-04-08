@@ -125,7 +125,7 @@ Add BSP to your Claude Desktop configuration:
   "mcpServers": {
     "bsp": {
       "command": "npx",
-      "args": ["@bsp/mcp"],
+      "args": ["bsp-mcp"],
       "env": {
         "BSP_BEO_DOMAIN": "your-name.bsp"
       }

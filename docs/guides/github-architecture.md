@@ -62,7 +62,7 @@ pip install bsp-sdk
 Connects any MCP-compatible AI (Claude, GPT, etc.) to the BSP protocol with active user consent.
 
 ```bash
-npm install @bsp/mcp
+npm install bsp-mcp
 ```
 
 **Available tools:**

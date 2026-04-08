@@ -98,7 +98,7 @@ These repositories contain the Institute's operational infrastructure and propri
 
 ### `bsp-contracts` — Smart Contracts on Arweave (unified repo)
 
-Source code, tests (49 vitest), build, and deploy scripts — all in one place. Previously `bsp-registry` was a separate deploy repo; it has been merged here and archived.
+Source code, tests (49 vitest), build, and deploy scripts — all in one place. Previously `bsp-contracts` was a separate deploy repo; it has been merged here and archived.
 
 | Contract | Purpose | Open to? |
 |----------|---------|---------|

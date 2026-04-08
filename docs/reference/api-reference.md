@@ -26,6 +26,7 @@ All routes under `POST /api/relayer/beo/...`
 | `POST /api/relayer/beo/rotate-key` | Rotate Ed25519 key | Ed25519 sig |
 | `POST /api/relayer/beo/recovery` | Update recovery config | Ed25519 sig |
 | `POST /api/relayer/beo/request-recovery` | Initiate Social Recovery | Public |
+| `POST /api/relayer/beo/revoke-all` | Revoke all consent tokens for a BEO | Ed25519 sig |
 | `POST /api/relayer/consent` | Grant ConsentToken | Ed25519 sig |
 
 ### Payload format (example: createBEO)
@@ -58,6 +59,22 @@ All routes under `POST /api/ieo/...`
 | `POST /api/ieo/rotate-key` | Rotate Ed25519 key | Ed25519 sig |
 | `POST /api/ieo/contacts` | Update API endpoint / webhook | Ed25519 sig |
 | `POST /api/ieo/recovery` | Update recovery config | Ed25519 sig |
+| `POST /api/ieo/approve` | Approve governance proposal (multisig 2-of-3) | X-Institute-Key |
+| `POST /api/ieo/certification` | Update IEO certification level | X-Institute-Key |
+
+---
+
+## Guardian Operations
+
+All routes under `/api/guardian/...`
+
+| Route | Description | Auth |
+|-------|-------------|------|
+| `POST /api/guardian/invite` | BEO holder invites a guardian | Ed25519 sig |
+| `GET /api/guardian/accept/:token` | Render guardian acceptance page | Public |
+| `POST /api/guardian/accept/:token` | Guardian accepts and registers Ed25519 public key | Public |
+| `GET /api/guardian/confirm-recovery/:token` | Render recovery confirmation page | Public |
+| `POST /api/guardian/confirm-recovery/:token` | Guardian confirms recovery (threshold 2-of-3 triggers key rotation) | Public |
 
 ---
 

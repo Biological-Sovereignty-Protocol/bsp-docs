@@ -110,7 +110,7 @@ Source code, tests (49 vitest), build, and deploy scripts — all in one place. 
 Contracts are **immutable after deployment**. Their specification is public in `bsp-spec`.
 
 ### `bsp-registry-api` — Gasless Relayer API
-The API server that relays user-signed transactions to Arweave and pays the gas. 36 REST routes covering BEO, IEO, consent, exchange, and query operations.
+The API server that relays user-signed transactions to Arweave and pays the gas. 38 REST routes covering BEO, IEO, consent, exchange, and query operations.
 
 | What passes through | What NEVER passes through |
 |--------------------|--------------------------|
@@ -134,7 +134,7 @@ Converts AVA's analysis into the multi-dimensional Ambrósio Vitality Score (SVA
 ```
 1. bsp-spec           ← Foundation: the standard everything implements
 2. bsp-contracts      ← On-chain infrastructure (immutable after deployment)
-3. bsp-registry-api   ← Gasless relayer API (36 routes)
+3. bsp-registry-api   ← Gasless relayer API (38 routes)
 4. bsp-sdk-typescript ← First SDK (widest integration coverage)
 5. bsp-mcp            ← AI connectivity (built on the TypeScript SDK)
 6. bsp-sdk-python     ← Lab SDK (follows the same spec)

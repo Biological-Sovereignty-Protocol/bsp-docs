@@ -52,7 +52,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [REST API Reference](docs/reference/api-reference.md) | All 36 routes — BEO, IEO, consent, exchange, query |
+| [REST API Reference](docs/reference/api-reference.md) | All 38 routes — BEO, IEO, consent, exchange, query |
 
 ---
 

@@ -8,9 +8,9 @@ description: "Complete reference for the BSP command-line interface — manage b
 Install globally or run via npx:
 
 ```bash
-npm install -g @bsp/cli
+npm install -g bspctl
 # or
-npx @bsp/cli --help
+npx bspctl --help
 ```
 
 ## Configuration
@@ -164,7 +164,7 @@ Formats: `JSON`, `CSV`, `FHIR_R4`
 ## Security
 
 - Private keys never leave your machine
-- All signing happens locally via `@bsp/sdk`
+- All signing happens locally via `bsp-sdk`
 - The registry API only receives signed payloads
 - Destructive operations require `--confirm`
 

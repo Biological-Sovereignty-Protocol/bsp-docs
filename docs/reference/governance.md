@@ -141,7 +141,7 @@ Approval {
 ### SDK Usage
 
 ```typescript
-import { GovernanceClient } from '@bsp/sdk'
+import { GovernanceClient } from 'bsp-sdk'
 
 const gov = new GovernanceClient({ keyholderKey: myPrivateKey })
 

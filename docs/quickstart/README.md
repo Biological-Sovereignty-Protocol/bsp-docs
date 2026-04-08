@@ -21,7 +21,7 @@
 
 ```bash
 # TypeScript / JavaScript
-npm install @bsp/sdk
+npm install bsp-sdk
 
 # Python
 pip install bsp-sdk
@@ -30,7 +30,7 @@ pip install bsp-sdk
 ### 2. Resolve a BEO
 
 ```typescript
-import { BEOClient } from '@bsp/sdk'
+import { BEOClient } from 'bsp-sdk'
 
 const client = new BEOClient()
 const beo = await client.resolve('andre.bsp')
@@ -40,7 +40,7 @@ console.log(beo.beo_id)
 ### 3. Read BioRecords (with consent)
 
 ```typescript
-import { ExchangeClient, AccessManager } from '@bsp/sdk'
+import { ExchangeClient, AccessManager } from 'bsp-sdk'
 
 // Get or request consent token
 const access = new AccessManager({ ieoId: 'my-app.bsp' })

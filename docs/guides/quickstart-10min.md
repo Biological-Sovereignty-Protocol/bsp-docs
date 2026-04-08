@@ -20,9 +20,9 @@ No blockchain wallet, no prior crypto experience required.
 ## Option A: Use the CLI (fastest)
 
 ```bash
-npx @bsp/cli create yourname.bsp       # Create BEO identity
-npx @bsp/cli config set private-key <your-key>
-npx @bsp/cli resolve yourname.bsp      # Verify on-chain
+npx bspctl create yourname.bsp       # Create BEO identity
+npx bspctl config set private-key <your-key>
+npx bspctl resolve yourname.bsp      # Verify on-chain
 ```
 
 The CLI handles key generation, signing, and API calls. Skip to "Grant Consent" if using the CLI.
@@ -32,7 +32,7 @@ The CLI handles key generation, signing, and API calls. Skip to "Grant Consent" 
 ## Option B: Install the SDK
 
 ```bash
-npm install @bsp/sdk
+npm install bsp-sdk
 ```
 
 ---
@@ -59,7 +59,7 @@ A BEO is the permanent biological identity of a person. Keys are generated local
 
 ```typescript
 // create-beo.ts
-import { BEOClient } from '@bsp/sdk'
+import { BEOClient } from 'bsp-sdk'
 import * as fs from 'fs'
 
 async function createBEO() {
@@ -123,7 +123,7 @@ An IEO is the identity of any organization that interacts with biological data. 
 
 ```typescript
 // create-ieo.ts
-import { IEOClient, IEOType } from '@bsp/sdk'
+import { IEOClient, IEOType } from 'bsp-sdk'
 import * as fs from 'fs'
 
 async function createIEO() {
@@ -169,7 +169,7 @@ The BEO holder (user) grants the IEO (lab) specific permissions via a ConsentTok
 
 ```typescript
 // grant-consent.ts
-import { BEOClient } from '@bsp/sdk'
+import { BEOClient } from 'bsp-sdk'
 import * as fs from 'fs'
 
 async function grantConsent() {
@@ -218,7 +218,7 @@ The lab submits a biological measurement to Alice's BEO. It must present the Con
 
 ```typescript
 // submit-record.ts
-import { BioRecordBuilder, ExchangeClient } from '@bsp/sdk'
+import { BioRecordBuilder, ExchangeClient } from 'bsp-sdk'
 import * as fs from 'fs'
 
 async function submitRecord() {
@@ -274,7 +274,7 @@ Query Alice's BEO for records. The lab presents the same ConsentToken.
 
 ```typescript
 // read-records.ts
-import { ExchangeClient } from '@bsp/sdk'
+import { ExchangeClient } from 'bsp-sdk'
 import * as fs from 'fs'
 
 async function readRecords() {
@@ -324,7 +324,7 @@ Alice revokes the lab's access. The revocation is instant and on-chain.
 
 ```typescript
 // revoke-consent.ts
-import { BEOClient } from '@bsp/sdk'
+import { BEOClient } from 'bsp-sdk'
 import * as fs from 'fs'
 
 async function revokeConsent() {
@@ -360,7 +360,7 @@ Once revoked, the token cannot be reinstated. If the user wants to grant access 
 All SDK methods throw typed `BSPError` instances. Catch them and branch on `error.code`.
 
 ```typescript
-import { ExchangeClient, BSPError } from '@bsp/sdk'
+import { ExchangeClient, BSPError } from 'bsp-sdk'
 
 const exchange = new ExchangeClient({ /* ... */ })
 

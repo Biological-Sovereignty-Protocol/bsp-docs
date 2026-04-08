@@ -75,7 +75,7 @@ A single token can include multiple intents. The IEO can only use what is listed
 Only the BEO holder can issue a ConsentToken. The SDK call below signs the grant locally and broadcasts it to Arweave via the relayer.
 
 ```typescript
-import { BEOClient } from '@bsp/sdk'
+import { BEOClient } from 'bsp-sdk'
 
 const client = new BEOClient({
   network:    'testnet',
@@ -112,7 +112,7 @@ Once the transaction confirms on Arweave (typically 2–5 seconds on testnet), t
 Before accepting any data operation, an IEO should verify that the token it holds is still valid. The SDK performs double verification: on-chain state + cryptographic signature check.
 
 ```typescript
-import { AccessManager } from '@bsp/sdk'
+import { AccessManager } from 'bsp-sdk'
 
 const access = new AccessManager({
   ieoId:      genomicsLabIeoId,
@@ -171,7 +171,7 @@ console.log('Expires at:', verification.token.expiresAt)
 Every `ExchangeClient` request requires the token ID. The SDK includes it in the `auth` block of the `BSPRequest` — you do not need to manage this manually.
 
 ```typescript
-import { ExchangeClient } from '@bsp/sdk'
+import { ExchangeClient } from 'bsp-sdk'
 
 const exchange = new ExchangeClient({
   ieoId:      genomicsLabIeoId,
@@ -232,7 +232,7 @@ Content-Type: application/json
 ### Revoke a Specific Token
 
 ```typescript
-import { BEOClient } from '@bsp/sdk'
+import { BEOClient } from 'bsp-sdk'
 
 const client = new BEOClient({
   privateKey: userPrivateKey,

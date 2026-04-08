@@ -45,10 +45,10 @@ bsp-spec/
 ```
 
 ### `bsp-sdk-typescript` — TypeScript SDK
-Published on npm as `@bsp/sdk`. For web platforms, mobile apps, and backend services.
+Published on npm as `bsp-sdk`. For web platforms, mobile apps, and backend services.
 
 ```bash
-npm install @bsp/sdk
+npm install bsp-sdk
 ```
 
 ### `bsp-sdk-python` — Python SDK
@@ -80,9 +80,9 @@ npm install @bsp/mcp
 Official CLI for managing BEOs, IEOs, consent, and health data from the terminal.
 
 ```bash
-npx @bsp/cli create andre.bsp
-npx @bsp/cli consent grant <beoId> <ieoId> --intents SUBMIT_RECORD --days 365
-npx @bsp/cli export <beoId> --token <tok> --format FHIR_R4
+npx bspctl create andre.bsp
+npx bspctl consent grant <beoId> <ieoId> --intents SUBMIT_RECORD --days 365
+npx bspctl export <beoId> --token <tok> --format FHIR_R4
 ```
 
 22 commands covering the full protocol lifecycle.

@@ -112,9 +112,9 @@ Mechanism for recovering a BEO private key without a central server. The holder 
 | Repository | Access | Purpose |
 |------------|--------|---------|
 | `bsp-spec` | Public | Complete protocol specification |
-| `bsp-sdk-typescript` | Public | Official TypeScript SDK (`@bsp/sdk`) |
+| `bsp-sdk-typescript` | Public | Official TypeScript SDK (`bsp-sdk`) |
 | `bsp-sdk-python` | Public | Official Python SDK (`bsp-sdk`) |
-| `bsp-cli` | Public | Official CLI (`npx @bsp/cli`) — 22 commands |
+| `bsp-cli` | Public | Official CLI (`npx bspctl`) — 22 commands |
 | `bsp-mcp` | Public | Official MCP server for AI connectivity (9 tools) |
 | `bsp-id-web` | Public | BSP identity web application |
 | `bsp-docs-repo` | Public | This documentation site |

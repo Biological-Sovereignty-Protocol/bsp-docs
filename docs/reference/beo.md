@@ -70,7 +70,7 @@ BEO creation is **open to anyone**. No permission from the Ambrósio Institute o
 
 ```typescript
 // Using the bsp-sdk-typescript
-import { BEOClient } from '@bsp/sdk'
+import { BEOClient } from 'bsp-sdk'
 
 const client = new BEOClient()
 
@@ -145,7 +145,7 @@ Locking does not revoke existing consent tokens. It suspends their effect until 
 ### Lock
 
 ```typescript
-import { BEOClient } from '@bsp/sdk'
+import { BEOClient } from 'bsp-sdk'
 
 const client = new BEOClient({ ownerKey: myPrivateKey })
 

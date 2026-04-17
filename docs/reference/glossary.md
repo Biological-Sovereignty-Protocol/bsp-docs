@@ -38,23 +38,23 @@ The institutional identity of any organization, system, or professional that int
 The most critical BSP contract. Manages all consent grants between BEOs and IEOs. Any system attempting to write a BioRecord or read BEO data must present a valid authorization registered in this contract. Without the holder's signature, the transaction is rejected by the blockchain — no server can bypass it. AccessControl is the true gatekeeper of the protocol.
 *See: [Security & Blockchain](../guides/security-blockchain.md)*
 
-### Arweave
-Decentralized storage blockchain where all BSP data and AO processes live. Pay once — data persists for 200+ years, guaranteed by a mathematical endowment model. Chosen because: eliminates central server dependency, even if the Institute closes, BEOs and BioRecords remain accessible. BSP processes run as AO processes on Arweave.
+### Aptos
+High-throughput Layer 1 blockchain where BSP smart contracts (Move modules) execute. Handles identity registration, consent management, domain allocation, and governance logic. SDK: `@aptos-labs/ts-sdk`.
 
-### AO
-Arweave's hyper-parallel compute platform. BSP processes run as AO processes on Arweave, using Lua for on-chain logic. Each process is permanent and communicates via messages. SDK: `@permaweb/aoconnect`.
+### Arweave
+Decentralized permanent storage layer where all BSP bio-data lives. Pay once — data persists for 200+ years, guaranteed by a mathematical endowment model. Chosen because: eliminates central server dependency, even if the Institute closes, BEOs and BioRecords remain accessible. Arweave stores BioRecords, encrypted data, and consent audit trails. Smart contract execution runs on Aptos.
 
 ### BEORegistry
-AO process on Arweave responsible for creating and indexing BEOs. **Open to anyone** — no approval from the Ambrósio Institute required. Records: public address, public key hash, and basic BEO metadata.
+Move module on Aptos responsible for creating and indexing BEOs. **Open to anyone** — no approval from the Ambrósio Institute required. Records: public address, public key hash, and basic BEO metadata.
 
 ### DomainRegistry
-AO process controlling the `.bsp` namespace. Guarantees uniqueness: `andre.bsp` can only exist once. Manages registrations, transfers, and revocations following protocol rules. Automatically consulted by the bsp-sdk when creating BEOs and IEOs.
+Move module on Aptos controlling the `.bsp` namespace. Guarantees uniqueness: `andre.bsp` can only exist once. Manages registrations, transfers, and revocations following protocol rules. Automatically consulted by the bsp-sdk when creating BEOs and IEOs.
 
-### Governance (process)
-AO process controlling modifications to other critical BSP processes. Implements the multi-signature model: critical operations (suspending an IEO, modifying protocol parameters) require signatures from at least 2 of 3 Institute authorized keyholders. No individual — including the founder — can unilaterally alter protocol rules.
+### Governance (contract)
+Move module on Aptos controlling modifications to other critical BSP smart contracts. Implements the multi-signature model: critical operations (suspending an IEO, modifying protocol parameters) require signatures from at least 2 of 3 Institute authorized keyholders. No individual — including the founder — can unilaterally alter protocol rules.
 
 ### IEORegistry
-AO process on Arweave managing BSP-Certified IEOs. Records which institutions obtained the certification seal, at which level, and with which authorized categories. Consulted by Ambrosio OS and other apps to verify institution credentials.
+Move module on Aptos managing BSP-Certified IEOs. Records which institutions obtained the certification seal, at which level, and with which authorized categories. Consulted by Ambrosio OS and other apps to verify institution credentials.
 
 ---
 
@@ -119,4 +119,4 @@ Mechanism for recovering a BEO private key without a central server. The holder 
 | `bsp-id-web` | Public | BSP identity web application |
 | `bsp-docs-repo` | Public | This documentation site |
 | `bsp-contracts` | Private | Smart contracts — source, tests, build, deploy (unified) |
-| `bsp-registry-api` | Private | Gasless relayer API — 38 REST routes, pays Arweave gas |
+| `bsp-registry-api` | Private | Gasless relayer API — 38 REST routes, pays Aptos gas |

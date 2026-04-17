@@ -12,7 +12,7 @@ Key properties:
 
 - **Signed with Ed25519** — the user's private key signs the grant. No third party can issue a token on the user's behalf, including the Ambrósio Institute.
 - **On Arweave** — permanent, auditable, tamper-proof. The token exists independently of any server.
-- **Enforced by AO process** — the `AccessControl` AO process on Arweave is the only gatekeeper. No server-side bypass is possible.
+- **Enforced by Move module** — the `AccessControl` smart contract on Aptos is the only gatekeeper. No server-side bypass is possible.
 - **Instantly revocable** — revocation is a single on-chain transaction. The moment it is written, the token is dead. No grace period, no retry window.
 - **Fully scoped** — the token encodes exactly which institution, which data categories, which actions, and for how long. Nothing outside that scope is accessible.
 
